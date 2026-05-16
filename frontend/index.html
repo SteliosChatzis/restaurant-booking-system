@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Boogaloo&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -166,16 +166,25 @@
 
       .hero__title {
         margin: 0 0 36px;
-        font-size: clamp(52px, 8vw, 100px);
-        font-weight: 900;
-        line-height: 0.92;
-        color: var(--foreground);
-        letter-spacing: -0.02em;
+        font-family: 'Boogaloo', cursive;
+        font-weight: 400;
+        font-size: clamp(64px, 9.5vw, 116px);
+        line-height: 1;
+        letter-spacing: 0.01em;
       }
 
       .hero__title em {
         font-style: normal;
+      }
+
+      .hero__title .word-charoumenes {
         color: var(--primary);
+        display: block;
+      }
+
+      .hero__title .word-sardeles {
+        color: var(--secondary);
+        display: block;
       }
 
       .hero__sub {
@@ -928,7 +937,7 @@
         }
       
         .hero__title {
-          font-size: clamp(46px, 13vw, 70px);
+          font-size: clamp(52px, 14vw, 80px);
         }
 
         .hero__sub {
@@ -1125,8 +1134,8 @@
         <div class="hero__content">
           <p class="hero__eyebrow">NEW AGE ΜΕΖΕΔΟΠΩΛΕΙΟ · ΘΕΣΣΑΛΟΝΙΚΗ</p>
           <h1 class="hero__title">
-            ΧΑΡΟΥ<em>ΜΕΝΕΣ</em><br />
-            ΣΑΡΔΕ<em>ΛΕΣ</em>
+            <span class="word-charoumenes">ΧΑΡΟΥΜΕΝΕΣ</span>
+            <span class="word-sardeles">ΣΑΡΔΕΛΕΣ</span>
           </h1>
           <div class="hero__sub">
             <p class="hero__tagline">
