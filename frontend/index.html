@@ -76,7 +76,7 @@
         display: grid;
         grid-template-rows: 1fr auto;
         overflow: hidden;
-        background: var(--secondary);
+        background: var(--white);
         border-bottom: 4px solid var(--primary);
       }
 
@@ -87,7 +87,7 @@
         pointer-events: none;
       }
 
-      /* Diagonal stripe pattern */
+      /* Diagonal stripe pattern in blue */
       .hero__bg::before {
         content: "";
         position: absolute;
@@ -96,22 +96,45 @@
           -55deg,
           transparent,
           transparent 38px,
-          rgba(255,255,255,0.03) 38px,
-          rgba(255,255,255,0.03) 40px
+          rgba(27,53,100,0.04) 38px,
+          rgba(27,53,100,0.04) 40px
         );
       }
 
-      /* Large decorative circle */
+      /* Large decorative circle — blue top right */
       .hero__bg::after {
         content: "";
         position: absolute;
-        right: -120px;
-        top: -120px;
-        width: 560px;
-        height: 560px;
+        right: -140px;
+        top: -140px;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        background: var(--secondary);
+        opacity: 0.08;
+      }
+
+      /* Red accent blob bottom left */
+      .hero__accent {
+        position: absolute;
+        left: -80px;
+        bottom: -80px;
+        width: 340px;
+        height: 340px;
         border-radius: 50%;
         background: var(--primary);
-        opacity: 0.18;
+        opacity: 0.07;
+        pointer-events: none;
+      }
+
+      /* Blue vertical bar on left edge */
+      .hero__bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: var(--secondary);
       }
 
       .hero__content {
@@ -138,7 +161,7 @@
         font-size: clamp(52px, 9vw, 112px);
         font-weight: 900;
         line-height: 0.92;
-        color: var(--white);
+        color: var(--foreground);
         letter-spacing: -0.02em;
       }
 
@@ -154,12 +177,12 @@
         gap: 32px;
         padding: 28px 0 0;
         margin-top: 32px;
-        border-top: 1px solid rgba(255,255,255,0.12);
+        border-top: 1px solid var(--border);
       }
 
       .hero__tagline {
         margin: 0;
-        color: rgba(255,255,255,0.6);
+        color: var(--muted);
         font-size: 15px;
         line-height: 1.65;
         max-width: 360px;
@@ -173,14 +196,14 @@
 
       .button--ghost {
         background: transparent;
-        border-color: rgba(255,255,255,0.3);
-        color: var(--white);
+        border-color: var(--secondary);
+        color: var(--secondary);
       }
 
       .button--ghost:hover {
-        background: var(--white);
-        border-color: var(--white);
-        color: var(--secondary);
+        background: var(--secondary);
+        border-color: var(--secondary);
+        color: var(--white);
       }
 
       .hero__badges {
@@ -190,13 +213,13 @@
         gap: 0;
         width: min(1060px, calc(100% - 48px));
         margin: 32px auto 0;
-        border-top: 1px solid rgba(255,255,255,0.08);
+        border-top: 1px solid var(--border);
       }
 
       .hero__badge {
         flex: 1;
         padding: 18px 20px;
-        border-right: 1px solid rgba(255,255,255,0.08);
+        border-right: 1px solid var(--border);
       }
 
       .hero__badge:last-child {
@@ -205,14 +228,14 @@
 
       .hero__badge strong {
         display: block;
-        color: var(--white);
+        color: var(--secondary);
         font-size: 22px;
         font-weight: 900;
         letter-spacing: -0.01em;
       }
 
       .hero__badge span {
-        color: rgba(255,255,255,0.42);
+        color: var(--muted);
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.18em;
@@ -872,6 +895,8 @@
 
       <header class="hero">
         <div class="hero__bg" aria-hidden="true"></div>
+        <div class="hero__accent" aria-hidden="true"></div>
+        <div class="hero__bar" aria-hidden="true"></div>
 
         <div class="hero__content">
           <p class="hero__eyebrow">NEW AGE ΜΕΖΕΔΟΠΩΛΕΙΟ · ΘΕΣΣΑΛΟΝΙΚΗ</p>
