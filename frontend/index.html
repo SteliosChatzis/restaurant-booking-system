@@ -504,56 +504,192 @@
         font-weight: 700;
       }
       
-      .footer {
-        background: var(--foreground);
-        color: var(--white);
+      /* ── NAVBAR ── */
+      .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--white);
+        border-bottom: 3px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        height: 68px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       }
-      
-      .footer__logo {
-        display: grid;
-        place-items: center;
-        padding: 12px;
-        border-bottom: 4px solid var(--primary);
+
+      .navbar__logo {
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: var(--foreground);
+        text-decoration: none;
+        line-height: 1.1;
       }
-      
-      .footer__grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 36px;
-        padding: 48px 0;
+
+      .navbar__logo em {
+        font-style: normal;
+        color: var(--primary);
       }
-      
-      .footer__grid strong,
-      .footer__grid span {
-        display: block;
+
+      .navbar__links {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
       }
-      
-      .footer__grid span {
-        margin-top: 6px;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 14px;
-      }
-      
-      .footer__label {
-        margin: 0 0 12px;
-        color: rgba(255, 255, 255, 0.38);
+
+      .navbar__links a {
         font-size: 12px;
         font-weight: 900;
         letter-spacing: 0.18em;
+        color: var(--foreground);
+        text-decoration: none;
+        transition: color 150ms ease;
       }
-      
-      .footer__phone {
+
+      .navbar__links a:hover {
         color: var(--primary);
-        font-size: 22px;
       }
-      
-      .copyright {
-        margin: 0;
-        padding: 0 16px 34px;
-        color: rgba(255, 255, 255, 0.28);
-        text-align: center;
+
+      .navbar__cta {
+        display: inline-flex;
+        align-items: center;
+        height: 40px;
+        padding: 0 20px;
+        background: var(--primary);
+        color: var(--white) !important;
         font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        border: 2px solid var(--primary);
+        transition: background 160ms ease, color 160ms ease !important;
+      }
+
+      .navbar__cta:hover {
+        background: var(--white) !important;
+        color: var(--primary) !important;
+      }
+
+      /* ── FOOTER ── */
+      .footer {
+        background: var(--secondary);
+        color: var(--white);
+      }
+
+      .footer__main {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 48px;
+        width: min(1060px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 56px 0 48px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .footer__brand {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .footer__name {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+        color: var(--white);
+      }
+
+      .footer__name em {
+        font-style: normal;
+        color: var(--primary);
+      }
+
+      .footer__tagline {
+        margin: 0;
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.6;
+      }
+
+      .footer__social {
+        display: flex;
+        gap: 12px;
+        margin-top: 4px;
+      }
+
+      .footer__social a {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        color: var(--white);
+        transition: border-color 160ms ease, background 160ms ease;
+      }
+
+      .footer__social a:hover {
+        border-color: var(--primary);
+        background: var(--primary);
+      }
+
+      .footer__social svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .footer__col-label {
+        margin: 0 0 16px;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.22em;
+        color: var(--primary);
+      }
+
+      .footer__col p,
+      .footer__col a {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        display: block;
+        line-height: 1.5;
+        transition: color 150ms ease;
+      }
+
+      .footer__col a:hover {
+        color: var(--white);
+      }
+
+      .footer__col strong {
+        display: block;
+        color: var(--white);
+        font-size: 15px;
+        margin-bottom: 6px;
+      }
+
+      .footer__bottom {
+        width: min(1060px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 20px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .footer__bottom p {
+        margin: 0;
+        font-size: 11px;
         letter-spacing: 0.14em;
+        color: rgba(255,255,255,0.28);
       }
       
       .admin-header {
@@ -816,7 +952,30 @@
           padding: 28px 18px;
         }
       
-        .footer__grid {
+        .navbar {
+          padding: 0 18px;
+          height: 58px;
+        }
+
+        .navbar__links {
+          gap: 16px;
+        }
+
+        .navbar__links li:not(:last-child) {
+          display: none;
+        }
+
+        .footer__main {
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+        }
+
+        .footer__brand {
+          grid-column: 1 / -1;
+        }
+
+        .footer__bottom {
+          flex-direction: column;
           text-align: center;
         }
       
@@ -848,6 +1007,19 @@
   <body>
     <div data-view="site">
 
+
+      <nav class="navbar">
+        <a class="navbar__logo" href="/">
+          ΧΑΡΟΥ<em>ΜΕΝΕΣ</em><br/>ΣΑΡΔΕ<em>ΛΕΣ</em>
+        </a>
+        <ul class="navbar__links">
+          <li><a href="/">ΑΡΧΙΚΗ</a></li>
+          <li><a href="#menu-grid">ΜΕΝΟΥ</a></li>
+          <li><a href="#book">ΚΡΑΤΗΣΗ</a></li>
+          <li><a href="#footer">ΕΠΙΚΟΙΝΩΝΙΑ</a></li>
+          <li><a class="navbar__cta" href="#book">ΚΛΕΙΣΕ ΤΡΑΠΕΖΙ</a></li>
+        </ul>
+      </nav>
 
       <header class="hero">
         <div class="hero__bg" aria-hidden="true"></div>
@@ -1067,28 +1239,42 @@
         </section>
       </main>
 
-      <footer class="footer">
-        <div class="footer__logo">
-          <img class="logo" src="/assets/images/logo.png" alt="Χαρούμενες Σαρδέλες" />
-        </div>
-        <div class="container footer__grid">
-          <div>
-            <p class="footer__label">ΜΕΖΕΔΟΠΩΛΕΙΟ</p>
-            <strong>Χαρούμενες Σαρδέλες</strong>
-            <span>Θεσσαλονίκη · 2026</span>
+      <footer class="footer" id="footer">
+        <div class="footer__main">
+          <div class="footer__brand">
+            <p class="footer__name">ΧΑΡΟΥ<em>ΜΕΝΕΣ</em><br/>ΣΑΡΔΕ<em>ΛΕΣ</em></p>
+            <p class="footer__tagline">New age μεζεδοπωλείο<br/>στην καρδιά της Θεσσαλονίκης.</p>
+            <div class="footer__social">
+              <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              </a>
+            </div>
           </div>
-          <div>
-            <p class="footer__label">ΔΙΕΥΘΥΝΣΗ</p>
+
+          <div class="footer__col">
+            <p class="footer__col-label">ΠΛΟΗΓΗΣΗ</p>
+            <a href="/">Αρχική</a>
+            <a href="#menu-grid">Μενού</a>
+            <a href="#book">Κράτηση</a>
+          </div>
+
+          <div class="footer__col">
+            <p class="footer__col-label">ΔΙΕΥΘΥΝΣΗ</p>
             <strong>Ολύμπου 15</strong>
-            <span>Θεσσαλονίκη 546 30</span>
+            <p>Θεσσαλονίκη 546 30</p>
           </div>
-          <div>
-            <p class="footer__label">ΕΠΙΚΟΙΝΩΝΙΑ</p>
-            <strong class="footer__phone">2310 553 479</strong>
-            <span>Ανοιχτά καθημερινά έως 23:00</span>
+
+          <div class="footer__col">
+            <p class="footer__col-label">ΕΠΙΚΟΙΝΩΝΙΑ</p>
+            <a href="tel:2310553479">2310 553 479</a>
+            <p>Ανοιχτά καθημερινά<br/>έως 23:00</p>
           </div>
         </div>
-        <p class="copyright">© 2026 ΧΑΡΟΥΜΕΝΕΣ ΣΑΡΔΕΛΕΣ · ΜΗΝ ΨΑΡΩΝΕΙΣ</p>
+
+        <div class="footer__bottom">
+          <p>© 2026 ΧΑΡΟΥΜΕΝΕΣ ΣΑΡΔΕΛΕΣ</p>
+          <p>ΜΗΝ ΨΑΡΩΝΕΙΣ</p>
+        </div>
       </footer>
     </div>
 
