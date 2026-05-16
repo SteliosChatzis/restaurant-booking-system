@@ -478,7 +478,12 @@ function showCurrentView() {
   return currentView;
 }
 
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  window.scrollTo(0, 0);
   const currentView = showCurrentView();
 
   if (currentView === "admin") {
