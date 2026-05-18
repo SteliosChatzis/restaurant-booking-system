@@ -19,3 +19,5 @@ services:
         sync: false
       - key: MAIL_FROM
         sync: false
+      - key: PUBLIC_SITE_URL
+        value: "https://xaroumenessardeles.pages.dev"

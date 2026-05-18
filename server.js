@@ -337,29 +337,63 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function getPublicSiteUrl() {
+  return (process.env.PUBLIC_SITE_URL || "https://xaroumenessardeles.pages.dev").replace(/\/+$/, "");
+}
+
 function confirmationEmailHtml(reservation) {
+  const logoUrl = `${getPublicSiteUrl()}/assets/images/logo.png`;
+
   return `
-    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#181b22">
-      <h1 style="color:#c51f2f;margin-bottom:8px">Η κράτησή σας επιβεβαιώθηκε</h1>
-      <p>Γεια σας ${escapeHtml(reservation.name)},</p>
-      <p>Η κράτησή σας στις <strong>Χαρούμενες Σαρδέλες</strong> επιβεβαιώθηκε.</p>
-      <table style="border-collapse:collapse;margin:20px 0">
-        <tr>
-          <td style="padding:6px 14px 6px 0;color:#71717a">Ημερομηνία</td>
-          <td style="padding:6px 0"><strong>${escapeHtml(reservation.date)}</strong></td>
-        </tr>
-        <tr>
-          <td style="padding:6px 14px 6px 0;color:#71717a">Ώρα</td>
-          <td style="padding:6px 0"><strong>${escapeHtml(reservation.time)}</strong></td>
-        </tr>
-        <tr>
-          <td style="padding:6px 14px 6px 0;color:#71717a">Άτομα</td>
-          <td style="padding:6px 0"><strong>${escapeHtml(reservation.guests)}</strong></td>
-        </tr>
-      </table>
-      <p>Διεύθυνση: Ολύμπου 15, Θεσσαλονίκη 546 30</p>
-      <p>Τηλέφωνο: <a href="tel:2310553479" style="color:#c51f2f">2310 553 479</a></p>
-      <p style="margin-top:24px">Σας περιμένουμε!</p>
+    <div style="margin:0;padding:0;background:#f7f4ef;font-family:Arial,sans-serif;color:#181b22">
+      <div style="max-width:620px;margin:0 auto;padding:28px 16px">
+        <div style="background:#ffffff;border:1px solid #eadfd6;border-top:5px solid #c51f2f;padding:28px">
+          <div style="text-align:center;margin-bottom:24px">
+            <img src="${escapeHtml(logoUrl)}" alt="Χαρούμενες Σαρδέλες" style="width:190px;max-width:80%;height:auto" />
+          </div>
+          <p style="margin:0 0 8px;color:#c51f2f;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">
+            Μην ψαρώνεις
+          </p>
+          <h1 style="margin:0 0 16px;color:#181b22;font-size:28px;line-height:1.15">
+            Το τραπέζι σας είναι κρατημένο!
+          </h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.7">
+            Γεια σας ${escapeHtml(reservation.name)}, η κράτησή σας στις <strong>Χαρούμενες Σαρδέλες</strong>
+            επιβεβαιώθηκε. Σας περιμένουμε στην Ολύμπου για μεζέδες, καλή παρέα και χαλαρή διάθεση.
+          </p>
+          <table style="width:100%;border-collapse:collapse;margin:24px 0;background:#fbfaf8">
+            <tr>
+              <td style="padding:12px 14px;border-bottom:1px solid #eadfd6;color:#71717a;font-size:13px">Ημερομηνία</td>
+              <td style="padding:12px 14px;border-bottom:1px solid #eadfd6;text-align:right"><strong>${escapeHtml(reservation.date)}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding:12px 14px;border-bottom:1px solid #eadfd6;color:#71717a;font-size:13px">Ώρα</td>
+              <td style="padding:12px 14px;border-bottom:1px solid #eadfd6;text-align:right"><strong>${escapeHtml(reservation.time)}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding:12px 14px;color:#71717a;font-size:13px">Άτομα</td>
+              <td style="padding:12px 14px;text-align:right"><strong>${escapeHtml(reservation.guests)}</strong></td>
+            </tr>
+          </table>
+          <div style="margin:22px 0;padding:16px;background:#fff3f4;border-left:4px solid #c51f2f">
+            <p style="margin:0;font-size:15px;line-height:1.6">
+              Αν θέλετε αλλαγή ή ακύρωση στην κράτηση, καλέστε μας στο
+              <a href="tel:2310553479" style="color:#c51f2f;font-weight:700;text-decoration:none">2310 553 479</a>.
+            </p>
+          </div>
+          <p style="margin:0 0 6px;line-height:1.6">
+            <strong>Διεύθυνση:</strong> Ολύμπου 15, Θεσσαλονίκη 546 30
+          </p>
+          <p style="margin:0;line-height:1.6">
+            <strong>Τηλέφωνο:</strong>
+            <a href="tel:2310553479" style="color:#c51f2f;text-decoration:none">2310 553 479</a>
+          </p>
+          <p style="margin:26px 0 0;color:#71717a;font-size:14px;line-height:1.6">
+            Σας περιμένουμε με χαρά.<br />
+            Η ομάδα από τις Χαρούμενες Σαρδέλες
+          </p>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -368,16 +402,20 @@ function confirmationEmailText(reservation) {
   return [
     `Γεια σας ${reservation.name},`,
     "",
-    "Η κράτησή σας στις Χαρούμενες Σαρδέλες επιβεβαιώθηκε.",
+    "Μην ψαρώνεις, το τραπέζι σας στις Χαρούμενες Σαρδέλες είναι κρατημένο!",
+    "Η κράτησή σας επιβεβαιώθηκε και σας περιμένουμε στην Ολύμπου για μεζέδες, καλή παρέα και χαλαρή διάθεση.",
     "",
     `Ημερομηνία: ${reservation.date}`,
     `Ώρα: ${reservation.time}`,
     `Άτομα: ${reservation.guests}`,
     "",
+    "Αν θέλετε αλλαγή ή ακύρωση στην κράτηση, καλέστε μας στο 2310 553 479.",
+    "",
     "Διεύθυνση: Ολύμπου 15, Θεσσαλονίκη 546 30",
     "Τηλέφωνο: 2310 553 479",
     "",
-    "Σας περιμένουμε!",
+    "Σας περιμένουμε με χαρά.",
+    "Η ομάδα από τις Χαρούμενες Σαρδέλες",
   ].join("\n");
 }
 
@@ -395,7 +433,7 @@ async function sendConfirmationEmail(reservation) {
     body: JSON.stringify({
       from: process.env.MAIL_FROM,
       to: [reservation.email],
-      subject: "Η κράτησή σας επιβεβαιώθηκε | Χαρούμενες Σαρδέλες",
+      subject: "Μην ψαρώνεις, η κράτησή σας επιβεβαιώθηκε | Χαρούμενες Σαρδέλες",
       text: confirmationEmailText(reservation),
       html: confirmationEmailHtml(reservation),
     }),

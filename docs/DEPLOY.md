@@ -32,15 +32,18 @@ Email confirmation environment variables for Resend:
 
 - `RESEND_API_KEY`
 - `MAIL_FROM`
+- `PUBLIC_SITE_URL`
 
 Example:
 
 ```txt
 RESEND_API_KEY=re_xxxxxxxxx
 MAIL_FROM="Χαρούμενες Σαρδέλες <noreply@xaroumenessardeles.com>"
+PUBLIC_SITE_URL=https://xaroumenessardeles.pages.dev
 ```
 
 The backend sends a confirmation email through Resend when an admin changes a reservation status to `confirmed`.
+`PUBLIC_SITE_URL` is used for the logo in the confirmation email.
 
 The repository also includes `render.yaml`, so you can deploy it as a Render Blueprint from the repo root.
 
