@@ -384,8 +384,8 @@ function renderAdminFilters(reservations) {
     .map(
       ([filter, label]) => `
         <button class="filter-card ${currentFilter === filter ? "is-active" : ""}" data-filter="${filter}" data-testid="filter-${filter}">
-          <strong>${counts[filter]}</strong>
           <span>${label}</span>
+          <strong>${counts[filter]}</strong>
         </button>
       `
     )
@@ -449,9 +449,9 @@ function groupReservations(reservations) {
 function formatReservationDate(reservation) {
   const date = getReservationDateTime(reservation);
   return date.toLocaleDateString("el-GR", {
-    weekday: "short",
     day: "2-digit",
-    month: "short",
+    month: "2-digit",
+    year: "2-digit",
   });
 }
 
@@ -466,16 +466,19 @@ function renderAdminSummary(reservations) {
 
   summary.innerHTML = `
     <div>
-      <span>Ενεργές επόμενες</span>
+      <span>Active</span>
       <strong>${counts.active}</strong>
+      <small>επόμενες</small>
     </div>
     <div>
-      <span>Σήμερα</span>
+      <span>Today</span>
       <strong>${counts.today}</strong>
+      <small>κρατήσεις</small>
     </div>
     <div>
-      <span>Άτομα σε εκκρεμότητα</span>
+      <span>Pending guests</span>
       <strong>${pendingGuests}</strong>
+      <small>άτομα</small>
     </div>
   `;
 }
@@ -552,7 +555,18 @@ function renderReservations(reservations) {
   );
 
   if (filteredReservations.length === 0) {
-    list.innerHTML = '<div class="empty-state">Δεν βρέθηκαν κρατήσεις με αυτά τα φίλτρα</div>';
+    list.innerHTML = `
+      <section class="booking-panel">
+        <div class="booking-panel__header">
+          <div>
+            <p>Booking List</p>
+            <h2>Κρατήσεις</h2>
+          </div>
+          <span>0 αποτελέσματα</span>
+        </div>
+        <div class="empty-state">Δεν βρέθηκαν κρατήσεις με αυτά τα φίλτρα</div>
+      </section>
+    `;
     visibleReservationIds = [];
     updateBulkSelectionControls();
     return;
@@ -561,69 +575,85 @@ function renderReservations(reservations) {
   visibleReservationIds = filteredReservations.map((reservation) => reservation.id);
   selectedReservationIds = new Set([...selectedReservationIds].filter((id) => reservations.some((reservation) => reservation.id === id)));
 
-  list.innerHTML = groupReservations(filteredReservations)
-    .map(
-      (group) => `
-        <section class="reservation-group">
-          <div class="reservation-group__header">
-            <h2>${group.title}</h2>
-            <span>${group.items.length} ${group.items.length === 1 ? "κράτηση" : "κρατήσεις"}</span>
-          </div>
-          ${group.items
-            .map(
-              (reservation) => `
-        <article class="reservation-card" data-testid="reservation-${reservation.id}">
-          <label class="reservation-card__select" aria-label="Επιλογή κράτησης ${escapeHtml(reservation.name)}">
-            <input
-              type="checkbox"
-              data-select-reservation
-              value="${escapeHtml(reservation.id)}"
-              ${selectedReservationIds.has(reservation.id) ? "checked" : ""}
-            />
-          </label>
-          <div class="reservation-card__date">
-            <strong>${escapeHtml(formatReservationDate(reservation))}</strong>
-            <span>${escapeHtml(reservation.time)} · ${escapeHtml(reservation.guests)} άτομα</span>
-          </div>
-          <div class="reservation-card__info">
-            <div>
-              <small>ΟΝΟΜΑ</small>
-              <p><strong>${escapeHtml(reservation.name)}</strong></p>
-              <p>${escapeHtml(occasionLabels[reservation.occasion] || "Χωρίς περίσταση")}</p>
-            </div>
-            <div>
-              <small>ΕΠΙΚΟΙΝΩΝΙΑ</small>
-              <p><a href="tel:${escapeHtml(reservation.phone)}">${escapeHtml(reservation.phone)}</a></p>
-              <p><a href="mailto:${escapeHtml(reservation.email)}">${escapeHtml(reservation.email)}</a></p>
-            </div>
-            <div>
-              <small>ΚΑΤΑΣΤΑΣΗ</small>
-              <span class="status status--${escapeHtml(reservation.status)}">${escapeHtml(
-                statusLabels[reservation.status] || reservation.status
-              )}</span>
-              <p>#${escapeHtml(reservation.id.slice(0, 8))}</p>
-            </div>
-          </div>
-          <div class="reservation-card__actions">
-            ${
-              reservation.status !== "confirmed"
-                ? `<button class="action-button action-button--confirm" data-action="confirmed" data-id="${reservation.id}" data-testid="confirm-${reservation.id}">ΕΠΙΒΕΒΑΙΩΣΗ</button>`
-                : ""
-            }
-            ${
-              reservation.status !== "cancelled"
-                ? `<button class="action-button action-button--cancel" data-action="cancelled" data-id="${reservation.id}" data-testid="cancel-${reservation.id}">ΑΚΥΡΩΣΗ</button>`
-                : ""
-            }
-            <button class="action-button action-button--delete" data-action="delete" data-id="${reservation.id}" data-testid="delete-${reservation.id}">ΔΙΑΓΡΑΦΗ</button>
-          </div>
-        </article>`
-            )
-            .join("")}
-        </section>
-      `
-    )
-    .join("");
+  list.innerHTML = `
+    <section class="booking-panel">
+      <div class="booking-panel__header">
+        <div>
+          <p>Booking List</p>
+          <h2>Κρατήσεις</h2>
+        </div>
+        <span>${filteredReservations.length} ${filteredReservations.length === 1 ? "αποτέλεσμα" : "αποτελέσματα"}</span>
+      </div>
+      <div class="booking-table-wrap">
+        <table class="booking-table">
+          <thead>
+            <tr>
+              <th aria-label="Επιλογή"></th>
+              <th>Booking ID</th>
+              <th>Status</th>
+              <th>Guest</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Guests</th>
+              <th>Contact</th>
+              <th>Occasion</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredReservations
+              .map(
+                (reservation) => `
+                  <tr data-testid="reservation-${reservation.id}">
+                    <td>
+                      <input
+                        class="booking-checkbox"
+                        type="checkbox"
+                        data-select-reservation
+                        value="${escapeHtml(reservation.id)}"
+                        aria-label="Επιλογή κράτησης ${escapeHtml(reservation.name)}"
+                        ${selectedReservationIds.has(reservation.id) ? "checked" : ""}
+                      />
+                    </td>
+                    <td><span class="booking-id">#${escapeHtml(reservation.id.slice(0, 8))}</span></td>
+                    <td>
+                      <span class="status status--${escapeHtml(reservation.status)}">${escapeHtml(
+                        statusLabels[reservation.status] || reservation.status
+                      )}</span>
+                    </td>
+                    <td>
+                      <strong>${escapeHtml(reservation.name)}</strong>
+                      <small>${escapeHtml(reservation.email)}</small>
+                    </td>
+                    <td>${escapeHtml(formatReservationDate(reservation))}</td>
+                    <td>${escapeHtml(reservation.time)}</td>
+                    <td>${escapeHtml(reservation.guests)}</td>
+                    <td><a href="tel:${escapeHtml(reservation.phone)}">${escapeHtml(reservation.phone)}</a></td>
+                    <td>${escapeHtml(occasionLabels[reservation.occasion] || "-")}</td>
+                    <td>
+                      <div class="table-actions">
+                        ${
+                          reservation.status !== "confirmed"
+                            ? `<button class="table-action table-action--confirm" data-action="confirmed" data-id="${reservation.id}" data-testid="confirm-${reservation.id}">Confirm</button>`
+                            : ""
+                        }
+                        ${
+                          reservation.status !== "cancelled"
+                            ? `<button class="table-action table-action--cancel" data-action="cancelled" data-id="${reservation.id}" data-testid="cancel-${reservation.id}">Cancel</button>`
+                            : ""
+                        }
+                        <button class="table-action table-action--delete" data-action="delete" data-id="${reservation.id}" data-testid="delete-${reservation.id}">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
 
   list.querySelectorAll("[data-action]").forEach((button) => {
     button.addEventListener("click", () => {
