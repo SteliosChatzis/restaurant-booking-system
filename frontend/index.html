@@ -1171,6 +1171,113 @@
         border-color: #ecc1c6;
         color: var(--primary);
       }
+
+      .admin-layout {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .admin-sidebar {
+        position: sticky;
+        top: 18px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--white);
+      }
+
+      .admin-sidebar__section {
+        padding: 14px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .admin-sidebar__section:last-child {
+        border-bottom: 0;
+      }
+
+      .admin-sidebar__title {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .admin-summary {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .admin-summary div {
+        min-height: 0;
+        border: 1px solid #eeeeee;
+        border-radius: 6px;
+        padding: 10px 12px;
+        background: #fbfbfb;
+      }
+
+      .admin-summary strong {
+        color: var(--foreground);
+        font-size: 22px;
+      }
+
+      .admin-filters {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+
+      .filter-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        width: 100%;
+        min-height: 40px;
+        border-radius: 6px;
+        padding: 9px 10px;
+        text-align: left;
+      }
+
+      .filter-card.is-active {
+        background: var(--secondary);
+        color: var(--white);
+      }
+
+      .filter-card.is-active strong {
+        background: rgba(255, 255, 255, 0.16);
+        color: var(--white);
+      }
+
+      .refresh-status {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+
+      .refresh-status__track {
+        height: 5px;
+        border-radius: 999px;
+      }
+
+      .admin-logout {
+        width: 100%;
+      }
+
+      .admin-content {
+        min-width: 0;
+      }
       
       .empty-state {
         padding: 60px 20px;
@@ -1231,6 +1338,14 @@
 
         .admin-actions__spacer {
           display: none;
+        }
+
+        .admin-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .admin-sidebar {
+          position: static;
         }
 
         .reservation-card__date {
@@ -1473,98 +1588,116 @@
 
       <main class="admin-page admin-shell" id="admin-shell">
         <div class="container">
-          <div class="admin-summary" id="admin-summary"></div>
-          <div class="admin-filters" id="admin-filters"></div>
-          <div class="refresh-status" aria-live="polite">
-            <div>
-              <strong>Auto refresh</strong>
-              <span id="refresh-label">Ανανέωση κάθε 30s</span>
-            </div>
-            <div class="refresh-status__track" aria-hidden="true">
-              <div class="refresh-status__bar" id="refresh-bar"></div>
-            </div>
-          </div>
-          <div class="admin-toolbar">
-            <input
-              class="admin-search"
-              id="admin-search"
-              data-testid="input-search"
-              type="search"
-              placeholder="Αναζήτηση με όνομα, τηλέφωνο, email, ημερομηνία..."
-            />
-            <select id="admin-date-scope" aria-label="Φίλτρο ημερομηνίας">
-              <option value="active">Ενεργές επόμενες</option>
-              <option value="today">Σήμερα</option>
-              <option value="upcoming">Μελλοντικές</option>
-              <option value="past">Παλαιότερες</option>
-              <option value="all">Όλες οι ημερομηνίες</option>
-            </select>
-            <select id="admin-sort" aria-label="Ταξινόμηση">
-              <option value="date-asc">Πιο κοντινές πρώτα</option>
-              <option value="date-desc">Πιο μακρινές πρώτα</option>
-              <option value="created-desc">Νεότερες αιτήσεις</option>
-            </select>
-          </div>
-          <div class="admin-actions" aria-label="Ενέργειες κρατήσεων">
-            <button class="admin-button admin-button--primary" id="toggle-manual-form" type="button">
-              ΧΕΙΡΟΚΙΝΗΤΗ ΠΡΟΣΘΗΚΗ
-            </button>
-            <button class="admin-button" id="select-all-visible" type="button">SELECT ALL</button>
-            <button class="admin-button" id="clear-selected" type="button" disabled>ΚΑΘΑΡΙΣΜΟΣ</button>
-            <span class="admin-actions__spacer"></span>
-            <span class="admin-actions__count" id="selected-count">0 επιλεγμένες</span>
-            <button class="admin-button admin-button--danger" id="delete-selected" type="button" disabled>
-              ΔΙΑΓΡΑΦΗ ΕΠΙΛΕΓΜΕΝΩΝ
-            </button>
-          </div>
-          <section class="manual-reservation" id="manual-reservation-panel" aria-label="Χειροκίνητη προσθήκη κράτησης">
-            <h2>Χειροκίνητη προσθήκη</h2>
-            <form id="manual-reservation-form">
-              <div class="form-grid">
-                <label>
-                  <span>ΟΝΟΜΑ *</span>
-                  <input id="manual-name" name="name" placeholder="Π.χ. Γιώργος Παπαδόπουλος" required />
-                </label>
-                <label>
-                  <span>ΤΗΛΕΦΩΝΟ *</span>
-                  <input name="phone" placeholder="Π.χ. 6900 000 000" required />
-                </label>
-                <label>
-                  <span>EMAIL *</span>
-                  <input name="email" type="email" placeholder="email@example.com" required />
-                </label>
-                <label>
-                  <span>ΑΤΟΜΑ *</span>
-                  <input name="guests" type="number" min="1" max="20" value="2" required />
-                </label>
-                <label>
-                  <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
-                  <input id="manual-date" name="date" type="date" required />
-                </label>
-                <label>
-                  <span>ΩΡΑ *</span>
-                  <select id="manual-time" name="time" required></select>
-                </label>
-                <label class="form-grid__full">
-                  <span>ΠΕΡΙΣΤΑΣΗ</span>
-                  <select name="occasion">
-                    <option value="">Χωρίς περίσταση</option>
-                    <option value="birthday">Γενέθλια</option>
-                    <option value="anniversary">Επέτειος</option>
-                    <option value="romantic">Ρομαντικό δείπνο</option>
-                    <option value="business">Επιχειρηματικό γεύμα</option>
-                  </select>
-                </label>
+          <div class="admin-layout">
+            <aside class="admin-sidebar" aria-label="Admin navigation">
+              <div class="admin-sidebar__section">
+                <p class="admin-sidebar__title">Overview</p>
+                <div class="admin-summary" id="admin-summary"></div>
               </div>
-              <div class="manual-reservation__actions">
-                <button class="button" type="submit">ΠΡΟΣΘΗΚΗ ΚΡΑΤΗΣΗΣ</button>
-                <button class="admin-button" id="cancel-manual-form" type="button">ΑΚΥΡΩΣΗ</button>
+              <div class="admin-sidebar__section">
+                <p class="admin-sidebar__title">Bookings</p>
+                <div class="admin-filters" id="admin-filters"></div>
               </div>
-            </form>
-          </section>
-          <p class="admin-notice" id="admin-notice" role="status"></p>
-          <div class="reservations" id="reservations-list"></div>
-          <button class="action-button action-button--delete" id="admin-logout" type="button">ΑΠΟΣΥΝΔΕΣΗ</button>
+              <div class="admin-sidebar__section">
+                <p class="admin-sidebar__title">Sync</p>
+                <div class="refresh-status" aria-live="polite">
+                  <div>
+                    <strong>Auto refresh</strong>
+                    <span id="refresh-label">Ανανέωση κάθε 30s</span>
+                  </div>
+                  <div class="refresh-status__track" aria-hidden="true">
+                    <div class="refresh-status__bar" id="refresh-bar"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="admin-sidebar__section">
+                <button class="admin-button admin-logout" id="admin-logout" type="button">ΑΠΟΣΥΝΔΕΣΗ</button>
+              </div>
+            </aside>
+
+            <div class="admin-content">
+              <div class="admin-toolbar">
+                <input
+                  class="admin-search"
+                  id="admin-search"
+                  data-testid="input-search"
+                  type="search"
+                  placeholder="Αναζήτηση με όνομα, τηλέφωνο, email, ημερομηνία..."
+                />
+                <select id="admin-date-scope" aria-label="Φίλτρο ημερομηνίας">
+                  <option value="active">Ενεργές επόμενες</option>
+                  <option value="today">Σήμερα</option>
+                  <option value="upcoming">Μελλοντικές</option>
+                  <option value="past">Παλαιότερες</option>
+                  <option value="all">Όλες οι ημερομηνίες</option>
+                </select>
+                <select id="admin-sort" aria-label="Ταξινόμηση">
+                  <option value="date-asc">Πιο κοντινές πρώτα</option>
+                  <option value="date-desc">Πιο μακρινές πρώτα</option>
+                  <option value="created-desc">Νεότερες αιτήσεις</option>
+                </select>
+              </div>
+              <div class="admin-actions" aria-label="Ενέργειες κρατήσεων">
+                <button class="admin-button admin-button--primary" id="toggle-manual-form" type="button">
+                  ΧΕΙΡΟΚΙΝΗΤΗ ΠΡΟΣΘΗΚΗ
+                </button>
+                <button class="admin-button" id="select-all-visible" type="button">SELECT ALL</button>
+                <button class="admin-button" id="clear-selected" type="button" disabled>ΚΑΘΑΡΙΣΜΟΣ</button>
+                <span class="admin-actions__spacer"></span>
+                <span class="admin-actions__count" id="selected-count">0 επιλεγμένες</span>
+                <button class="admin-button admin-button--danger" id="delete-selected" type="button" disabled>
+                  ΔΙΑΓΡΑΦΗ ΕΠΙΛΕΓΜΕΝΩΝ
+                </button>
+              </div>
+              <section class="manual-reservation" id="manual-reservation-panel" aria-label="Χειροκίνητη προσθήκη κράτησης">
+                <h2>Χειροκίνητη προσθήκη</h2>
+                <form id="manual-reservation-form">
+                  <div class="form-grid">
+                    <label>
+                      <span>ΟΝΟΜΑ *</span>
+                      <input id="manual-name" name="name" placeholder="Π.χ. Γιώργος Παπαδόπουλος" required />
+                    </label>
+                    <label>
+                      <span>ΤΗΛΕΦΩΝΟ *</span>
+                      <input name="phone" placeholder="Π.χ. 6900 000 000" required />
+                    </label>
+                    <label>
+                      <span>EMAIL *</span>
+                      <input name="email" type="email" placeholder="email@example.com" required />
+                    </label>
+                    <label>
+                      <span>ΑΤΟΜΑ *</span>
+                      <input name="guests" type="number" min="1" max="20" value="2" required />
+                    </label>
+                    <label>
+                      <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
+                      <input id="manual-date" name="date" type="date" required />
+                    </label>
+                    <label>
+                      <span>ΩΡΑ *</span>
+                      <select id="manual-time" name="time" required></select>
+                    </label>
+                    <label class="form-grid__full">
+                      <span>ΠΕΡΙΣΤΑΣΗ</span>
+                      <select name="occasion">
+                        <option value="">Χωρίς περίσταση</option>
+                        <option value="birthday">Γενέθλια</option>
+                        <option value="anniversary">Επέτειος</option>
+                        <option value="romantic">Ρομαντικό δείπνο</option>
+                        <option value="business">Επιχειρηματικό γεύμα</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="manual-reservation__actions">
+                    <button class="button" type="submit">ΠΡΟΣΘΗΚΗ ΚΡΑΤΗΣΗΣ</button>
+                    <button class="admin-button" id="cancel-manual-form" type="button">ΑΚΥΡΩΣΗ</button>
+                  </div>
+                </form>
+              </section>
+              <p class="admin-notice" id="admin-notice" role="status"></p>
+              <div class="reservations" id="reservations-list"></div>
+            </div>
+          </div>
         </div>
       </main>
     </div>
