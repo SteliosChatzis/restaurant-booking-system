@@ -350,10 +350,72 @@
       }
       
       .booking-form {
+        position: relative;
         background: var(--white);
         border: 1px solid var(--border);
         border-top: 4px solid var(--primary);
         padding: 42px;
+        overflow: hidden;
+      }
+
+      .booking-form__content {
+        transition: filter 180ms ease, opacity 180ms ease;
+      }
+
+      .booking-form.is-submitting .booking-form__content {
+        filter: blur(3px);
+        opacity: 0.42;
+        pointer-events: none;
+      }
+
+      .booking-loading {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        padding: 28px;
+        background: rgba(255, 255, 255, 0.72);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms ease;
+      }
+
+      .booking-form.is-submitting .booking-loading {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .booking-loading__panel {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        max-width: 360px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--primary);
+        background: var(--white);
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(24, 27, 34, 0.14);
+      }
+
+      .booking-loading__spinner {
+        width: 34px;
+        height: 34px;
+        border: 3px solid rgba(197, 31, 47, 0.18);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 850ms linear infinite;
+      }
+
+      .booking-loading strong {
+        font-size: 18px;
+      }
+
+      .booking-loading p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
       }
       
       .form-grid {
@@ -1326,6 +1388,12 @@
           transform: translateX(-50%);
         }
       }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
       
       @media (max-width: 820px) {
         .topbar {
@@ -1503,50 +1571,60 @@
             </div>
 
             <form class="booking-form reveal" id="booking-form">
-              <div class="form-grid">
-                <label>
-                  <span>ΟΝΟΜΑ *</span>
-                  <input name="name" data-testid="input-name" placeholder="Π.χ. Γιώργος Παπαδόπουλος" required />
-                </label>
-                <label>
-                  <span>ΤΗΛΕΦΩΝΟ *</span>
-                  <input name="phone" data-testid="input-phone" placeholder="Π.χ. 6900 000 000" required />
-                </label>
-                <label>
-                  <span>EMAIL *</span>
-                  <input name="email" data-testid="input-email" type="email" placeholder="email@example.com" required />
-                </label>
-                <label>
-                  <span>ΑΤΟΜΑ *</span>
-                  <input name="guests" data-testid="input-guests" type="number" min="1" max="20" value="2" required />
-                </label>
-                <label>
-                  <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
-                  <input name="date" data-testid="input-date" type="date" required />
-                </label>
-                <label>
-                  <span>ΩΡΑ *</span>
-                  <select name="time" data-testid="select-time" required></select>
-                </label>
-                <label class="form-grid__full">
-                  <span>ΠΕΡΙΣΤΑΣΗ (ΠΡΟΑΙΡΕΤΙΚΟ)</span>
-                  <select name="occasion" data-testid="select-occasion">
-                    <option value="">Επιλέξτε αν υπάρχει ειδική περίσταση</option>
-                    <option value="birthday">Γενέθλια</option>
-                    <option value="anniversary">Επέτειος</option>
-                    <option value="romantic">Ρομαντικό δείπνο</option>
-                    <option value="business">Επιχειρηματικό γεύμα</option>
-                  </select>
-                </label>
+              <div class="booking-form__content">
+                <div class="form-grid">
+                  <label>
+                    <span>ΟΝΟΜΑ *</span>
+                    <input name="name" data-testid="input-name" placeholder="Π.χ. Γιώργος Παπαδόπουλος" required />
+                  </label>
+                  <label>
+                    <span>ΤΗΛΕΦΩΝΟ *</span>
+                    <input name="phone" data-testid="input-phone" placeholder="Π.χ. 6900 000 000" required />
+                  </label>
+                  <label>
+                    <span>EMAIL *</span>
+                    <input name="email" data-testid="input-email" type="email" placeholder="email@example.com" required />
+                  </label>
+                  <label>
+                    <span>ΑΤΟΜΑ *</span>
+                    <input name="guests" data-testid="input-guests" type="number" min="1" max="20" value="2" required />
+                  </label>
+                  <label>
+                    <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
+                    <input name="date" data-testid="input-date" type="date" required />
+                  </label>
+                  <label>
+                    <span>ΩΡΑ *</span>
+                    <select name="time" data-testid="select-time" required></select>
+                  </label>
+                  <label class="form-grid__full">
+                    <span>ΠΕΡΙΣΤΑΣΗ (ΠΡΟΑΙΡΕΤΙΚΟ)</span>
+                    <select name="occasion" data-testid="select-occasion">
+                      <option value="">Επιλέξτε αν υπάρχει ειδική περίσταση</option>
+                      <option value="birthday">Γενέθλια</option>
+                      <option value="anniversary">Επέτειος</option>
+                      <option value="romantic">Ρομαντικό δείπνο</option>
+                      <option value="business">Επιχειρηματικό γεύμα</option>
+                    </select>
+                  </label>
+                </div>
+
+                <button class="button button--full" data-testid="button-submit" type="submit">
+                  ΚΑΝΕ ΚΡΑΤΗΣΗ ΤΩΡΑ
+                </button>
+                <p class="form-note">
+                  Ή καλέστε μας στο <a href="tel:2310553479">2310 553 479</a>
+                </p>
+                <p class="form-message" id="form-message" role="status"></p>
               </div>
 
-              <button class="button button--full" data-testid="button-submit" type="submit">
-                ΚΑΝΕ ΚΡΑΤΗΣΗ ΤΩΡΑ
-              </button>
-              <p class="form-note">
-                Ή καλέστε μας στο <a href="tel:2310553479">2310 553 479</a>
-              </p>
-              <p class="form-message" id="form-message" role="status"></p>
+              <div class="booking-loading" aria-hidden="true">
+                <div class="booking-loading__panel">
+                  <span class="booking-loading__spinner"></span>
+                  <strong>Στέλνουμε την κράτηση</strong>
+                  <p>Παρακαλώ μην κλείσετε το παράθυρο.</p>
+                </div>
+              </div>
             </form>
           </div>
         </section>

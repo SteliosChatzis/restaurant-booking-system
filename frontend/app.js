@@ -321,6 +321,10 @@ function initBookingForm() {
       occasion: formData.get("occasion"),
     };
 
+    form.classList.add("is-submitting");
+    form.setAttribute("aria-busy", "true");
+    message.textContent = "";
+
     try {
       await createReservation(reservation);
       form.reset();
@@ -330,6 +334,9 @@ function initBookingForm() {
       message.textContent = "Η κράτηση στάλθηκε! Θα επικοινωνήσουμε μαζί σας σύντομα.";
     } catch {
       message.textContent = "Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά ή καλέστε μας.";
+    } finally {
+      form.classList.remove("is-submitting");
+      form.removeAttribute("aria-busy");
     }
   });
 }
