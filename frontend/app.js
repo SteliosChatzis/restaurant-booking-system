@@ -85,7 +85,7 @@ const filterLabels = {
 const apiBase =
   window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8787"
-    : "";
+    : "https://sardeles-backend.onrender.com";
 let currentFilter = "all";
 let isAdminRendering = false;
 let lastAdminRefreshAt = null;

@@ -257,28 +257,28 @@ function confirmationEmailText(reservation) {
 }
 
 async function sendConfirmationEmail(reservation) {
-  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM) {
+  if (!process.env.BREVO_API_KEY || !process.env.MAIL_FROM) {
     return { configured: false, sent: false };
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "api-key": process.env.BREVO_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: process.env.MAIL_FROM,
-      to: [reservation.email],
+      sender: { email: process.env.MAIL_FROM, name: "Χαρούμενες Σαρδέλες" },
+      to: [{ email: reservation.email, name: reservation.name }],
       subject: "Η κράτησή σας επιβεβαιώθηκε | Χαρούμενες Σαρδέλες",
-      text: confirmationEmailText(reservation),
-      html: confirmationEmailHtml(reservation),
+      textContent: confirmationEmailText(reservation),
+      htmlContent: confirmationEmailHtml(reservation),
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Resend API error: ${response.status} ${errorText}`);
+    throw new Error(`Brevo API error: ${response.status} ${errorText}`);
   }
 
   return { configured: true, sent: true };
