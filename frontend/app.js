@@ -487,17 +487,17 @@ function renderAdminSummary(reservations) {
 
   summary.innerHTML = `
     <div>
-      <span>Active</span>
+      <span>Ενεργές</span>
       <strong>${counts.active}</strong>
       <small>επόμενες</small>
     </div>
     <div>
-      <span>Today</span>
+      <span>Σήμερα</span>
       <strong>${counts.today}</strong>
       <small>κρατήσεις</small>
     </div>
     <div>
-      <span>Pending guests</span>
+      <span>Άτομα σε αναμονή</span>
       <strong>${pendingGuests}</strong>
       <small>άτομα</small>
     </div>
@@ -580,7 +580,7 @@ function renderReservations(reservations) {
       <section class="booking-panel">
         <div class="booking-panel__header">
           <div>
-            <p>Booking List</p>
+            <p>Λίστα κρατήσεων</p>
             <h2>Κρατήσεις</h2>
           </div>
           <span>0 αποτελέσματα</span>
@@ -600,7 +600,7 @@ function renderReservations(reservations) {
     <section class="booking-panel">
       <div class="booking-panel__header">
         <div>
-          <p>Booking List</p>
+          <p>Λίστα κρατήσεων</p>
           <h2>Κρατήσεις</h2>
         </div>
         <span>${filteredReservations.length} ${filteredReservations.length === 1 ? "αποτέλεσμα" : "αποτελέσματα"}</span>
@@ -610,15 +610,15 @@ function renderReservations(reservations) {
           <thead>
             <tr>
               <th aria-label="Επιλογή"></th>
-              <th>Booking ID</th>
-              <th>Status</th>
-              <th>Guest</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Guests</th>
-              <th>Contact</th>
-              <th>Occasion</th>
-              <th>Actions</th>
+              <th>Κωδικός</th>
+              <th>Κατάσταση</th>
+              <th>Πελάτης</th>
+              <th>Ημερομηνία</th>
+              <th>Ώρα</th>
+              <th>Άτομα</th>
+              <th>Επικοινωνία</th>
+              <th>Περίσταση</th>
+              <th>Ενέργειες</th>
             </tr>
           </thead>
           <tbody>
@@ -655,15 +655,15 @@ function renderReservations(reservations) {
                       <div class="table-actions">
                         ${
                           reservation.status !== "confirmed"
-                            ? `<button class="table-action table-action--confirm" data-action="confirmed" data-id="${reservation.id}" data-testid="confirm-${reservation.id}">Confirm</button>`
+                            ? `<button class="table-action table-action--confirm" data-action="confirmed" data-id="${reservation.id}" data-testid="confirm-${reservation.id}">Επιβεβαίωση</button>`
                             : ""
                         }
                         ${
                           reservation.status !== "cancelled"
-                            ? `<button class="table-action table-action--cancel" data-action="cancelled" data-id="${reservation.id}" data-testid="cancel-${reservation.id}">Cancel</button>`
+                            ? `<button class="table-action table-action--cancel" data-action="cancelled" data-id="${reservation.id}" data-testid="cancel-${reservation.id}">Ακύρωση</button>`
                             : ""
                         }
-                        <button class="table-action table-action--delete" data-action="delete" data-id="${reservation.id}" data-testid="delete-${reservation.id}">Delete</button>
+                        <button class="table-action table-action--delete" data-action="delete" data-id="${reservation.id}" data-testid="delete-${reservation.id}">Διαγραφή</button>
                       </div>
                     </td>
                   </tr>

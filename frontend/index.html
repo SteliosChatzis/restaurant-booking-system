@@ -540,14 +540,6 @@
         letter-spacing: 0.16em;
       }
       
-      .admin-header__link {
-        margin-left: auto;
-        color: var(--primary);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.12em;
-      }
-      
       .admin-page {
         padding: 42px 0;
       }
@@ -1468,9 +1460,6 @@
           border-left: 0;
         }
       
-        .admin-header__link {
-          margin-left: 0;
-        }
       }
 
       [data-view] {
@@ -1657,19 +1646,16 @@
 
     <div data-view="admin">
       <header class="admin-header">
-        <a href="/" aria-label="Αρχική">
-          <img class="logo" src="/assets/images/logo.png" alt="Χαρούμενες Σαρδέλες" />
-        </a>
-        <span>ADMIN PANEL</span>
-        <a class="admin-header__link" href="/">ΠΙΣΩ ΣΤΗ ΣΕΛΙΔΑ</a>
+        <img class="logo" src="/assets/images/logo.png" alt="Χαρούμενες Σαρδέλες" />
+        <span>ΠΙΝΑΚΑΣ ΔΙΑΧΕΙΡΙΣΗΣ</span>
       </header>
 
-      <section class="admin-login" id="admin-login" aria-label="Admin login">
+      <section class="admin-login" id="admin-login" aria-label="Είσοδος διαχείρισης">
         <form class="admin-login__panel" id="admin-login-form">
           <h1>Είσοδος admin</h1>
           <p>Οι κρατήσεις φορτώνουν μόνο μετά από έλεγχο στο backend.</p>
           <label>
-            <span>PASSWORD</span>
+            <span>ΚΩΔΙΚΟΣ</span>
             <input
               id="admin-login-password"
               name="password"
@@ -1686,20 +1672,20 @@
       <main class="admin-page admin-shell" id="admin-shell">
         <div class="container">
           <div class="admin-layout">
-            <aside class="admin-sidebar" aria-label="Admin navigation">
+            <aside class="admin-sidebar" aria-label="Πλοήγηση διαχείρισης">
               <div class="admin-sidebar__section">
-                <p class="admin-sidebar__title">Overview</p>
+                <p class="admin-sidebar__title">Σύνοψη</p>
                 <div class="admin-summary" id="admin-summary"></div>
               </div>
               <div class="admin-sidebar__section">
-                <p class="admin-sidebar__title">Bookings</p>
+                <p class="admin-sidebar__title">Κρατήσεις</p>
                 <div class="admin-filters" id="admin-filters"></div>
               </div>
               <div class="admin-sidebar__section">
-                <p class="admin-sidebar__title">Sync</p>
+                <p class="admin-sidebar__title">Συγχρονισμός</p>
                 <div class="refresh-status" aria-live="polite">
                   <div>
-                    <strong>Auto refresh</strong>
+                    <strong>Αυτόματη ενημέρωση</strong>
                     <span id="refresh-label">Ανανέωση κάθε 30s</span>
                   </div>
                   <div class="refresh-status__track" aria-hidden="true">
@@ -1738,7 +1724,7 @@
                 <button class="admin-button admin-button--primary" id="toggle-manual-form" type="button">
                   ΧΕΙΡΟΚΙΝΗΤΗ ΠΡΟΣΘΗΚΗ
                 </button>
-                <button class="admin-button" id="select-all-visible" type="button">SELECT ALL</button>
+                <button class="admin-button" id="select-all-visible" type="button">ΕΠΙΛΟΓΗ ΟΛΩΝ</button>
                 <button class="admin-button" id="clear-selected" type="button" disabled>ΚΑΘΑΡΙΣΜΟΣ</button>
                 <span class="admin-actions__spacer"></span>
                 <span class="admin-actions__count" id="selected-count">0 επιλεγμένες</span>
