@@ -1228,6 +1228,7 @@
 
       .admin-filters {
         display: grid;
+        grid-template-columns: 1fr;
         gap: 6px;
         margin: 0;
         padding: 0;
@@ -1237,13 +1238,27 @@
 
       .filter-card {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
+        gap: 10px;
         width: 100%;
         min-height: 40px;
         border-radius: 6px;
         padding: 9px 10px;
         text-align: left;
+        overflow: hidden;
+        white-space: normal;
+      }
+
+      .filter-card span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        line-height: 1.2;
+      }
+
+      .filter-card strong {
+        justify-self: end;
+        flex-shrink: 0;
       }
 
       .filter-card.is-active {
