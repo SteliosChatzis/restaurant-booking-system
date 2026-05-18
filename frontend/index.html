@@ -633,16 +633,18 @@
       }
       
       .refresh-status__track {
-        height: 4px;
+        height: 3px;
         overflow: hidden;
-        background: var(--border);
+        border-radius: 999px;
+        background: rgba(24, 27, 34, 0.08);
       }
       
       .refresh-status__bar {
         width: 0%;
         height: 100%;
-        background: var(--primary);
-        transition: width 240ms linear;
+        border-radius: inherit;
+        background: rgba(27, 53, 100, 0.28);
+        transition: width 900ms ease-out;
       }
       
       .admin-search {
@@ -974,10 +976,11 @@
 
       .refresh-status {
         grid-template-columns: auto minmax(120px, 1fr);
-        gap: 14px;
+        gap: 12px;
         margin-bottom: 12px;
         padding: 10px 12px;
         border-radius: 6px;
+        color: rgba(24, 27, 34, 0.78);
       }
 
       .refresh-status strong {
@@ -987,6 +990,7 @@
       }
 
       .refresh-status span {
+        color: rgba(113, 113, 122, 0.82);
         font-size: 12px;
       }
 
@@ -1274,7 +1278,7 @@
       .refresh-status {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: 7px;
         margin: 0;
         padding: 0;
         border: 0;
@@ -1282,7 +1286,7 @@
       }
 
       .refresh-status__track {
-        height: 5px;
+        height: 3px;
         border-radius: 999px;
       }
 

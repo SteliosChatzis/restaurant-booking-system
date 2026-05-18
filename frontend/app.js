@@ -740,11 +740,10 @@ function updateRefreshStatus() {
   const secondsLeft = Math.max(0, Math.ceil((nextAdminRefreshAt.getTime() - now) / 1000));
 
   refreshBar.style.width = `${progress}%`;
-  refreshLabel.textContent = `Τελευταία ενημέρωση ${lastAdminRefreshAt.toLocaleTimeString("el-GR", {
+  refreshLabel.textContent = `Ενημερώθηκε ${lastAdminRefreshAt.toLocaleTimeString("el-GR", {
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
-  })} · επόμενο σε ${secondsLeft}s`;
+  })} · ${secondsLeft}s`;
 }
 
 function initAdmin() {
@@ -913,7 +912,7 @@ function startAdminRefresh() {
   }
 
   if (!adminRefreshStatusInterval) {
-    adminRefreshStatusInterval = setInterval(updateRefreshStatus, 1000);
+    adminRefreshStatusInterval = setInterval(updateRefreshStatus, 1500);
   }
 }
 
