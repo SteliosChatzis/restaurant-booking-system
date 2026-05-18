@@ -847,10 +847,28 @@ function initAdmin() {
   });
 
   document.querySelector("#select-all-visible")?.addEventListener("click", () => {
-    visibleReservationIds.forEach((id) => selectedReservationIds.add(id));
-    document.querySelectorAll("[data-select-reservation]").forEach((checkbox) => {
-      checkbox.checked = true;
-    });
+    const checkboxes = document.querySelectorAll("[data-select-reservation]");
+
+    const allSelected =
+      visibleReservationIds.length > 0 &&
+      visibleReservationIds.every((id) => selectedReservationIds.has(id));
+
+    if (allSelected) {
+      // Καθαρισμός όταν είναι ήδη όλα επιλεγμένα
+      visibleReservationIds.forEach((id) => selectedReservationIds.delete(id));
+
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+    } else {
+      // Επιλογή όλων
+      visibleReservationIds.forEach((id) => selectedReservationIds.add(id));
+
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = true;
+      });
+    }
+
     updateBulkSelectionControls();
   });
 
