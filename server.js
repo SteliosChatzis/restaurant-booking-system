@@ -12,6 +12,12 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "*")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const adminPassword = process.env.ADMIN_PASSWORD || "";
+const adminSessions = new Map();
+const loginAttempts = new Map();
+const sessionMaxAgeSeconds = 60 * 60 * 12;
+const maxLoginAttempts = 8;
+const loginWindowMs = 15 * 60 * 1000;
 
 async function initDatabase() {
   await database.execute(`
@@ -155,7 +161,126 @@ function corsHeaders(origin) {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
   };
+}
+
+function getCookie(request, name) {
+  const cookies = request.headers.cookie || "";
+  const match = cookies
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(`${name}=`));
+
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : "";
+}
+
+function isSecureRequest(request) {
+  return request.headers["x-forwarded-proto"] === "https";
+}
+
+function sessionCookie(token, request) {
+  const secure = isSecureRequest(request) || process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `sardeles_admin_session=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/api; Max-Age=${sessionMaxAgeSeconds}${secure}`;
+}
+
+function clearSessionCookie(request) {
+  const secure = isSecureRequest(request) || process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `sardeles_admin_session=; HttpOnly; SameSite=Lax; Path=/api; Max-Age=0${secure}`;
+}
+
+function sendJsonWithCookie(response, status, body, origin, cookie) {
+  response.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Set-Cookie": cookie,
+    ...corsHeaders(origin),
+  });
+  response.end(JSON.stringify(body));
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function getClientKey(request) {
+  return String(request.headers["x-forwarded-for"] || request.socket.remoteAddress || "unknown")
+    .split(",")[0]
+    .trim();
+}
+
+function isLoginRateLimited(request) {
+  const key = getClientKey(request);
+  const now = Date.now();
+  const attempt = loginAttempts.get(key);
+
+  if (!attempt || attempt.resetAt <= now) {
+    loginAttempts.set(key, { count: 0, resetAt: now + loginWindowMs });
+    return false;
+  }
+
+  return attempt.count >= maxLoginAttempts;
+}
+
+function recordFailedLogin(request) {
+  const key = getClientKey(request);
+  const now = Date.now();
+  const attempt = loginAttempts.get(key) || { count: 0, resetAt: now + loginWindowMs };
+  attempt.count += 1;
+  loginAttempts.set(key, attempt);
+}
+
+function clearFailedLogins(request) {
+  loginAttempts.delete(getClientKey(request));
+}
+
+function passwordsMatch(inputPassword) {
+  const provided = Buffer.from(String(inputPassword));
+  const expected = Buffer.from(adminPassword);
+
+  if (provided.length !== expected.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(provided, expected);
+}
+
+function createAdminSession() {
+  const token = crypto.randomBytes(32).toString("base64url");
+  adminSessions.set(hashToken(token), Date.now() + sessionMaxAgeSeconds * 1000);
+  return token;
+}
+
+function isAdminAuthenticated(request) {
+  const token = getCookie(request, "sardeles_admin_session");
+  if (!token) return false;
+
+  const key = hashToken(token);
+  const expiresAt = adminSessions.get(key);
+  if (!expiresAt) return false;
+
+  if (expiresAt <= Date.now()) {
+    adminSessions.delete(key);
+    return false;
+  }
+
+  adminSessions.set(key, Date.now() + sessionMaxAgeSeconds * 1000);
+  return true;
+}
+
+function deleteAdminSession(request) {
+  const token = getCookie(request, "sardeles_admin_session");
+  if (token) {
+    adminSessions.delete(hashToken(token));
+  }
+}
+
+function requireAdmin(request, response, origin) {
+  if (isAdminAuthenticated(request)) {
+    return true;
+  }
+
+  sendJson(response, 401, { error: "admin authentication required" }, origin);
+  return false;
 }
 
 async function readBody(request) {
@@ -257,28 +382,28 @@ function confirmationEmailText(reservation) {
 }
 
 async function sendConfirmationEmail(reservation) {
-  if (!process.env.BREVO_API_KEY || !process.env.MAIL_FROM) {
+  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM) {
     return { configured: false, sent: false };
   }
 
-  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+  const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      "api-key": process.env.BREVO_API_KEY,
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sender: { email: process.env.MAIL_FROM, name: "Χαρούμενες Σαρδέλες" },
-      to: [{ email: reservation.email, name: reservation.name }],
+      from: process.env.MAIL_FROM,
+      to: [reservation.email],
       subject: "Η κράτησή σας επιβεβαιώθηκε | Χαρούμενες Σαρδέλες",
-      textContent: confirmationEmailText(reservation),
-      htmlContent: confirmationEmailHtml(reservation),
+      text: confirmationEmailText(reservation),
+      html: confirmationEmailHtml(reservation),
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Brevo API error: ${response.status} ${errorText}`);
+    throw new Error(`Resend API error: ${response.status} ${errorText}`);
   }
 
   return { configured: true, sent: true };
@@ -307,6 +432,8 @@ async function handleRequest(request, response) {
     }
 
     if (url.pathname === "/api/reservations" && request.method === "GET") {
+      if (!requireAdmin(request, response, origin)) return;
+
       const reservations = await readReservations();
       sendJson(response, 200, reservations, origin);
       return;
@@ -333,9 +460,47 @@ async function handleRequest(request, response) {
       return;
     }
 
+    if (url.pathname === "/api/admin/session" && request.method === "GET") {
+      sendJson(response, 200, { authenticated: isAdminAuthenticated(request) }, origin);
+      return;
+    }
+
+    if (url.pathname === "/api/admin/login" && request.method === "POST") {
+      if (!adminPassword) {
+        sendJson(response, 503, { error: "admin password is not configured" }, origin);
+        return;
+      }
+
+      if (isLoginRateLimited(request)) {
+        sendJson(response, 429, { error: "too many login attempts" }, origin);
+        return;
+      }
+
+      const body = await readBody(request);
+
+      if (!passwordsMatch(body.password || "")) {
+        recordFailedLogin(request);
+        sendJson(response, 401, { error: "password is invalid" }, origin);
+        return;
+      }
+
+      clearFailedLogins(request);
+      const token = createAdminSession();
+      sendJsonWithCookie(response, 200, { authenticated: true }, origin, sessionCookie(token, request));
+      return;
+    }
+
+    if (url.pathname === "/api/admin/logout" && request.method === "POST") {
+      deleteAdminSession(request);
+      sendJsonWithCookie(response, 200, { authenticated: false }, origin, clearSessionCookie(request));
+      return;
+    }
+
     const reservationId = parseId(url.pathname);
 
     if (reservationId && request.method === "PATCH") {
+      if (!requireAdmin(request, response, origin)) return;
+
       const body = await readBody(request);
       const reservation = await getReservation(reservationId);
 
@@ -376,6 +541,8 @@ async function handleRequest(request, response) {
     }
 
     if (reservationId && request.method === "DELETE") {
+      if (!requireAdmin(request, response, origin)) return;
+
       const deleted = await deleteReservationRecord(reservationId);
 
       if (!deleted) {

@@ -78,21 +78,28 @@ const statusLabels = {
 };
 
 const filterLabels = {
-  all: "ΚΡΑΤΗΣΕΙΣ",
+  all: "ΟΛΕΣ",
   pending: "ΕΚΚΡΕΜΕΙΣ",
+  confirmed: "ΕΠΙΒΕΒΑΙΩΜΕΝΕΣ",
+  cancelled: "ΑΚΥΡΩΜΕΝΕΣ",
 };
 
 const apiBase =
   window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8787"
-    : "https://sardeles-backend.onrender.com";
+    : "";
 let currentFilter = "all";
+let currentDateScope = "active";
+let currentSort = "date-asc";
 let isAdminRendering = false;
 let lastAdminRefreshAt = null;
 let nextAdminRefreshAt = null;
+let adminRefreshInterval = null;
+let adminRefreshStatusInterval = null;
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, {
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -106,6 +113,15 @@ async function apiRequest(path, options = {}) {
   }
 
   return response.json();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function getLocalReservations() {
@@ -122,6 +138,31 @@ async function getReservations() {
   } catch {
     return getLocalReservations();
   }
+}
+
+async function getReservationStats() {
+  return apiRequest("/api/reservations/stats");
+}
+
+async function getAdminSession() {
+  return apiRequest("/api/admin/session");
+}
+
+async function loginAdmin(password) {
+  return apiRequest("/api/admin/login", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+}
+
+async function logoutAdmin() {
+  return apiRequest("/api/admin/logout", {
+    method: "POST",
+  });
+}
+
+async function getAdminReservations() {
+  return apiRequest("/api/reservations");
 }
 
 async function createReservation(reservation) {
@@ -146,30 +187,16 @@ async function createReservation(reservation) {
 }
 
 async function updateReservationStatus(id, status) {
-  try {
-    return await apiRequest(`/api/reservations/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    });
-  } catch {
-    const reservations = getLocalReservations().map((reservation) =>
-      reservation.id === id ? { ...reservation, status } : reservation
-    );
-    saveLocalReservations(reservations);
-    return null;
-  }
+  return apiRequest(`/api/reservations/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
 }
 
 async function removeReservation(id) {
-  try {
-    return await apiRequest(`/api/reservations/${id}`, {
-      method: "DELETE",
-    });
-  } catch {
-    const reservations = getLocalReservations().filter((reservation) => reservation.id !== id);
-    saveLocalReservations(reservations);
-    return null;
-  }
+  return apiRequest(`/api/reservations/${id}`, {
+    method: "DELETE",
+  });
 }
 
 function formatDateForInput(date) {
@@ -228,19 +255,26 @@ function initMenu() {
 }
 
 async function updateStats() {
-  const reservations = await getReservations();
   const reservationsElement = document.querySelector("#stats-reservations");
   const guestsElement = document.querySelector("#stats-guests");
+  let stats = { total: 0, totalGuests: 0 };
+
+  try {
+    stats = await getReservationStats();
+  } catch {
+    const reservations = getLocalReservations();
+    stats = {
+      total: reservations.length,
+      totalGuests: reservations.reduce((total, reservation) => total + Number(reservation.guests || 0), 0),
+    };
+  }
 
   if (reservationsElement) {
-    reservationsElement.textContent = reservations.length;
+    reservationsElement.textContent = stats.total;
   }
 
   if (guestsElement) {
-    guestsElement.textContent = reservations.reduce(
-      (total, reservation) => total + Number(reservation.guests || 0),
-      0
-    );
+    guestsElement.textContent = stats.totalGuests;
   }
 }
 
@@ -290,25 +324,46 @@ function initBookingForm() {
 }
 
 function getCounts(reservations) {
+  const today = formatDateForInput(new Date());
+
   return {
     all: reservations.length,
     pending: reservations.filter((reservation) => reservation.status === "pending").length,
     confirmed: reservations.filter((reservation) => reservation.status === "confirmed").length,
     cancelled: reservations.filter((reservation) => reservation.status === "cancelled").length,
+    today: reservations.filter((reservation) => reservation.date === today).length,
+    active: reservations.filter((reservation) => reservation.status !== "cancelled" && reservation.date >= today).length,
   };
 }
 
 async function setReservationStatus(id, status) {
-  await updateReservationStatus(id, status);
-  await renderAdmin();
+  const button = document.querySelector(`[data-id="${CSS.escape(id)}"][data-action="${CSS.escape(status)}"]`);
+  if (button) button.disabled = true;
+
+  try {
+    await updateReservationStatus(id, status);
+    await renderAdmin();
+  } catch (error) {
+    showAdminNotice(error.message || "Η αλλαγή δεν ολοκληρώθηκε.", "error");
+    if (error.message.includes("authentication")) {
+      showAdminLogin();
+    }
+  }
 }
 
 async function deleteReservation(id) {
   const confirmed = confirm("Σίγουρα θέλεις να διαγράψεις αυτή την κράτηση;");
   if (!confirmed) return;
 
-  await removeReservation(id);
-  await renderAdmin();
+  try {
+    await removeReservation(id);
+    await renderAdmin();
+  } catch (error) {
+    showAdminNotice(error.message || "Η διαγραφή δεν ολοκληρώθηκε.", "error");
+    if (error.message.includes("authentication")) {
+      showAdminLogin();
+    }
+  }
 }
 
 function renderAdminFilters(reservations) {
@@ -335,47 +390,149 @@ function renderAdminFilters(reservations) {
   });
 }
 
+function getReservationDateTime(reservation) {
+  return new Date(`${reservation.date}T${reservation.time || "00:00"}`);
+}
+
+function getDateScope(reservation) {
+  const today = formatDateForInput(new Date());
+  if (reservation.date === today) return "today";
+  if (reservation.date > today) return "upcoming";
+  return "past";
+}
+
+function matchesDateScope(reservation) {
+  const scope = getDateScope(reservation);
+
+  if (currentDateScope === "all") return true;
+  if (currentDateScope === "active") return reservation.status !== "cancelled" && scope !== "past";
+  return scope === currentDateScope;
+}
+
+function sortReservations(reservations) {
+  return [...reservations].sort((first, second) => {
+    const firstTime = getReservationDateTime(first).getTime();
+    const secondTime = getReservationDateTime(second).getTime();
+
+    if (currentSort === "date-desc") return secondTime - firstTime;
+    if (currentSort === "created-desc") {
+      return new Date(second.createdAt || 0).getTime() - new Date(first.createdAt || 0).getTime();
+    }
+
+    return firstTime - secondTime;
+  });
+}
+
+function groupReservations(reservations) {
+  const groups = [
+    { key: "today", title: "Σήμερα", items: [] },
+    { key: "upcoming", title: "Επόμενες κρατήσεις", items: [] },
+    { key: "past", title: "Παλαιότερες", items: [] },
+  ];
+
+  reservations.forEach((reservation) => {
+    groups.find((group) => group.key === getDateScope(reservation)).items.push(reservation);
+  });
+
+  return groups.filter((group) => group.items.length > 0);
+}
+
+function formatReservationDate(reservation) {
+  const date = getReservationDateTime(reservation);
+  return date.toLocaleDateString("el-GR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+function renderAdminSummary(reservations) {
+  const summary = document.querySelector("#admin-summary");
+  if (!summary) return;
+
+  const counts = getCounts(reservations);
+  const pendingGuests = reservations
+    .filter((reservation) => reservation.status === "pending")
+    .reduce((total, reservation) => total + Number(reservation.guests || 0), 0);
+
+  summary.innerHTML = `
+    <div>
+      <span>Ενεργές επόμενες</span>
+      <strong>${counts.active}</strong>
+    </div>
+    <div>
+      <span>Σήμερα</span>
+      <strong>${counts.today}</strong>
+    </div>
+    <div>
+      <span>Άτομα σε εκκρεμότητα</span>
+      <strong>${pendingGuests}</strong>
+    </div>
+  `;
+}
+
+function showAdminNotice(message, tone = "default") {
+  const notice = document.querySelector("#admin-notice");
+  if (!notice) return;
+
+  notice.textContent = message;
+  notice.dataset.tone = tone;
+}
+
 function renderReservations(reservations) {
   const list = document.querySelector("#reservations-list");
   const searchInput = document.querySelector("#admin-search");
   if (!list || !searchInput) return;
 
   const searchTerm = searchInput.value.trim().toLowerCase();
-  const filteredReservations = reservations.filter((reservation) => {
-    const matchesFilter = currentFilter === "all" || reservation.status === currentFilter;
-    const searchableText = `${reservation.name} ${reservation.phone} ${reservation.email}`.toLowerCase();
-    return matchesFilter && searchableText.includes(searchTerm);
-  });
+  const filteredReservations = sortReservations(
+    reservations.filter((reservation) => {
+      const matchesFilter = currentFilter === "all" || reservation.status === currentFilter;
+      const searchableText = `${reservation.name} ${reservation.phone} ${reservation.email} ${reservation.date} ${
+        reservation.time
+      } ${occasionLabels[reservation.occasion] || ""}`.toLowerCase();
+      return matchesFilter && matchesDateScope(reservation) && searchableText.includes(searchTerm);
+    })
+  );
 
   if (filteredReservations.length === 0) {
-    list.innerHTML = '<div class="empty-state">Δεν βρέθηκαν κρατήσεις</div>';
+    list.innerHTML = '<div class="empty-state">Δεν βρέθηκαν κρατήσεις με αυτά τα φίλτρα</div>';
     return;
   }
 
-  list.innerHTML = filteredReservations
+  list.innerHTML = groupReservations(filteredReservations)
     .map(
-      (reservation) => `
+      (group) => `
+        <section class="reservation-group">
+          <div class="reservation-group__header">
+            <h2>${group.title}</h2>
+            <span>${group.items.length} ${group.items.length === 1 ? "κράτηση" : "κρατήσεις"}</span>
+          </div>
+          ${group.items
+            .map(
+              (reservation) => `
         <article class="reservation-card" data-testid="reservation-${reservation.id}">
+          <div class="reservation-card__date">
+            <strong>${escapeHtml(formatReservationDate(reservation))}</strong>
+            <span>${escapeHtml(reservation.time)} · ${escapeHtml(reservation.guests)} άτομα</span>
+          </div>
           <div class="reservation-card__info">
             <div>
               <small>ΟΝΟΜΑ</small>
-              <p><strong>${reservation.name}</strong></p>
-              <p>${occasionLabels[reservation.occasion] || ""}</p>
+              <p><strong>${escapeHtml(reservation.name)}</strong></p>
+              <p>${escapeHtml(occasionLabels[reservation.occasion] || "Χωρίς περίσταση")}</p>
             </div>
             <div>
               <small>ΕΠΙΚΟΙΝΩΝΙΑ</small>
-              <p>${reservation.phone}</p>
-              <p>${reservation.email}</p>
-            </div>
-            <div>
-              <small>ΗΜ/ΝΙΑ & ΩΡΑ</small>
-              <p><strong>${reservation.date}</strong></p>
-              <p>${reservation.time} · ${reservation.guests} άτομα</p>
+              <p><a href="tel:${escapeHtml(reservation.phone)}">${escapeHtml(reservation.phone)}</a></p>
+              <p><a href="mailto:${escapeHtml(reservation.email)}">${escapeHtml(reservation.email)}</a></p>
             </div>
             <div>
               <small>ΚΑΤΑΣΤΑΣΗ</small>
-              <span class="status status--${reservation.status}">${statusLabels[reservation.status]}</span>
-              <p>#${reservation.id.slice(0, 8)}</p>
+              <span class="status status--${escapeHtml(reservation.status)}">${escapeHtml(
+                statusLabels[reservation.status] || reservation.status
+              )}</span>
+              <p>#${escapeHtml(reservation.id.slice(0, 8))}</p>
             </div>
           </div>
           <div class="reservation-card__actions">
@@ -391,7 +548,10 @@ function renderReservations(reservations) {
             }
             <button class="action-button action-button--delete" data-action="delete" data-id="${reservation.id}" data-testid="delete-${reservation.id}">ΔΙΑΓΡΑΦΗ</button>
           </div>
-        </article>
+        </article>`
+            )
+            .join("")}
+        </section>
       `
     )
     .join("");
@@ -414,12 +574,21 @@ async function renderAdmin() {
   isAdminRendering = true;
 
   try {
-    const reservations = await getReservations();
+    const reservations = await getAdminReservations();
+    renderAdminSummary(reservations);
     renderAdminFilters(reservations);
     renderReservations(reservations);
+    showAdminNotice("");
     lastAdminRefreshAt = new Date();
     nextAdminRefreshAt = new Date(Date.now() + 30000);
     updateRefreshStatus();
+  } catch (error) {
+    if (error.message.includes("authentication")) {
+      showAdminLogin();
+      return;
+    }
+
+    showAdminNotice(error.message || "Δεν μπορέσαμε να φορτώσουμε τις κρατήσεις.", "error");
   } finally {
     isAdminRendering = false;
   }
@@ -449,15 +618,89 @@ function initAdmin() {
   const searchInput = document.querySelector("#admin-search");
   if (!searchInput) return;
 
-  searchInput.addEventListener("input", renderAdmin);
-  renderAdmin();
+  document.querySelector("#admin-login-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector("button");
+    const message = document.querySelector("#admin-login-message");
+    const password = form.elements.password.value;
 
-  const refreshInterval = setInterval(renderAdmin, 30000);
-  const refreshStatusInterval = setInterval(updateRefreshStatus, 1000);
-  window.addEventListener("beforeunload", () => {
-    clearInterval(refreshInterval);
-    clearInterval(refreshStatusInterval);
+    button.disabled = true;
+    message.textContent = "";
+
+    try {
+      await loginAdmin(password);
+      form.reset();
+      showAdminPanel();
+      renderAdmin();
+    } catch (error) {
+      message.textContent =
+        error.message === "too many login attempts"
+          ? "Πολλές προσπάθειες. Δοκίμασε ξανά σε λίγο."
+          : "Λάθος password ή μη ρυθμισμένο password στο Render.";
+    } finally {
+      button.disabled = false;
+    }
   });
+
+  document.querySelector("#admin-logout")?.addEventListener("click", async () => {
+    await logoutAdmin().catch(() => null);
+    stopAdminRefresh();
+    showAdminLogin();
+  });
+
+  searchInput.addEventListener("input", renderAdmin);
+  document.querySelector("#admin-date-scope")?.addEventListener("change", (event) => {
+    currentDateScope = event.target.value;
+    renderAdmin();
+  });
+  document.querySelector("#admin-sort")?.addEventListener("change", (event) => {
+    currentSort = event.target.value;
+    renderAdmin();
+  });
+
+  getAdminSession()
+    .then((session) => {
+      if (session.authenticated) {
+        showAdminPanel();
+        renderAdmin();
+        startAdminRefresh();
+      } else {
+        showAdminLogin();
+      }
+    })
+    .catch(() => showAdminLogin());
+
+  window.addEventListener("beforeunload", stopAdminRefresh);
+}
+
+function showAdminLogin() {
+  document.querySelector("#admin-login")?.classList.add("is-active");
+  document.querySelector("#admin-shell")?.classList.remove("is-active");
+  document.querySelector("#admin-login-password")?.focus();
+}
+
+function showAdminPanel() {
+  document.querySelector("#admin-login")?.classList.remove("is-active");
+  document.querySelector("#admin-shell")?.classList.add("is-active");
+  startAdminRefresh();
+}
+
+function startAdminRefresh() {
+  if (!adminRefreshInterval) {
+    adminRefreshInterval = setInterval(renderAdmin, 30000);
+  }
+
+  if (!adminRefreshStatusInterval) {
+    adminRefreshStatusInterval = setInterval(updateRefreshStatus, 1000);
+  }
+}
+
+function stopAdminRefresh() {
+  clearInterval(adminRefreshInterval);
+  clearInterval(adminRefreshStatusInterval);
+  adminRefreshInterval = null;
+  adminRefreshStatusInterval = null;
 }
 
 function getCurrentView() {
@@ -478,12 +721,7 @@ function showCurrentView() {
   return currentView;
 }
 
-if ("scrollRestoration" in history) {
-  history.scrollRestoration = "manual";
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-  window.scrollTo(0, 0);
   const currentView = showCurrentView();
 
   if (currentView === "admin") {

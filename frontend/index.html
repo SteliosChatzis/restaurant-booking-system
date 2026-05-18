@@ -71,154 +71,48 @@
       
       .hero {
         position: relative;
-        min-height: 520px;
+        min-height: 580px;
         height: 92vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         overflow: hidden;
-        background: var(--white);
         border-bottom: 4px solid var(--primary);
       }
-
-      .hero__bg {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-      }
-
-      /* Diagonal stripe pattern in blue */
-      .hero__bg::before {
-        content: "";
-        position: absolute;
-        inset: -20%;
-        background-image: repeating-linear-gradient(
-          -55deg,
-          transparent,
-          transparent 38px,
-          rgba(27,53,100,0.04) 38px,
-          rgba(27,53,100,0.04) 40px
-        );
-      }
-
-      /* Large decorative circle — blue top right */
-      .hero__bg::after {
-        content: "";
-        position: absolute;
-        right: -140px;
-        top: -140px;
-        width: 520px;
-        height: 520px;
-        border-radius: 50%;
-        background: var(--secondary);
-        opacity: 0.08;
-      }
-
-      /* Red accent blob bottom left */
-      .hero__accent {
-        position: absolute;
-        left: -80px;
-        bottom: -80px;
-        width: 340px;
-        height: 340px;
-        border-radius: 50%;
-        background: var(--primary);
-        opacity: 0.07;
-        pointer-events: none;
-      }
-
-      /* Blue vertical bar on left edge */
-      .hero__bar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 6px;
-        background: var(--secondary);
-      }
-
-      .hero__sardines {
+      
+      .hero__image,
+      .hero__overlay {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
-        pointer-events: none;
       }
-
-      .hero__content {
+      
+      .hero__image {
+        object-fit: cover;
+      }
+      
+      .hero__overlay {
+        background: rgba(0, 0, 0, 0.35);
+      }
+      
+      .hero__card {
         position: relative;
         z-index: 1;
-        width: min(1060px, calc(100% - 48px));
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-      }
-
-      .hero__eyebrow {
-        margin: 0 0 20px;
-        color: var(--primary);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.26em;
-      }
-
-      .hero__title {
-        margin: 0 0 36px;
-        font-family: 'Rubik', sans-serif;
-        font-weight: 900;
-        font-size: clamp(60px, 9vw, 112px);
-        line-height: 1.0;
-        letter-spacing: -0.01em;
-      }
-
-      .hero__title em {
-        font-style: normal;
-      }
-
-      .hero__title .word-charoumenes {
-        color: var(--primary);
-        display: block;
-      }
-
-      .hero__title .word-sardeles {
-        color: var(--secondary);
-        display: block;
-      }
-
-      .hero__sub {
+        width: min(560px, calc(100% - 32px));
         display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        gap: 32px;
-        padding-top: 28px;
-        border-top: 1px solid var(--border);
+        gap: 22px;
+        justify-items: center;
+        background: var(--white);
+        border-top: 4px solid var(--primary);
+        padding: 48px 56px;
+        text-align: center;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
       }
-
-      .hero__tagline {
+      
+      .hero__card p {
         margin: 0;
-        color: var(--foreground);
-        font-size: 15px;
-        font-weight: 700;
-        line-height: 1.65;
-        max-width: 400px;
-      }
-
-      .hero__actions {
-        flex-shrink: 0;
-      }
-
-      .button--ghost {
-        background: transparent;
-        border-color: var(--secondary);
-        color: var(--secondary);
-      }
-
-      .button--ghost:hover {
-        background: var(--secondary);
-        border-color: var(--secondary);
-        color: var(--white);
+        color: var(--muted);
+        line-height: 1.7;
       }
       
       .logo {
@@ -513,192 +407,56 @@
         font-weight: 700;
       }
       
-      /* ── NAVBAR ── */
-      .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: var(--white);
-        border-bottom: 3px solid var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 40px;
-        height: 68px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      .footer {
+        background: var(--foreground);
+        color: var(--white);
       }
-
-      .navbar__logo {
-        font-size: 15px;
-        font-weight: 900;
-        letter-spacing: 0.08em;
-        color: var(--foreground);
-        text-decoration: none;
-        line-height: 1.1;
+      
+      .footer__logo {
+        display: grid;
+        place-items: center;
+        padding: 12px;
+        border-bottom: 4px solid var(--primary);
       }
-
-      .navbar__logo em {
-        font-style: normal;
-        color: var(--primary);
+      
+      .footer__grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 36px;
+        padding: 48px 0;
       }
-
-      .navbar__links {
-        display: flex;
-        align-items: center;
-        gap: 32px;
-        list-style: none;
-        margin: 0;
-        padding: 0;
+      
+      .footer__grid strong,
+      .footer__grid span {
+        display: block;
       }
-
-      .navbar__links a {
+      
+      .footer__grid span {
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+      }
+      
+      .footer__label {
+        margin: 0 0 12px;
+        color: rgba(255, 255, 255, 0.38);
         font-size: 12px;
         font-weight: 900;
         letter-spacing: 0.18em;
-        color: var(--foreground);
-        text-decoration: none;
-        transition: color 150ms ease;
       }
-
-      .navbar__links a:hover {
+      
+      .footer__phone {
         color: var(--primary);
+        font-size: 22px;
       }
-
-      .navbar__cta {
-        display: inline-flex;
-        align-items: center;
-        height: 40px;
-        padding: 0 20px;
-        background: var(--primary);
-        color: var(--white) !important;
+      
+      .copyright {
+        margin: 0;
+        padding: 0 16px 34px;
+        color: rgba(255, 255, 255, 0.28);
+        text-align: center;
         font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.16em;
-        border: 2px solid var(--primary);
-        transition: background 160ms ease, color 160ms ease !important;
-      }
-
-      .navbar__cta:hover {
-        background: var(--white) !important;
-        color: var(--primary) !important;
-      }
-
-      /* ── FOOTER ── */
-      .footer {
-        background: var(--secondary);
-        color: var(--white);
-      }
-
-      .footer__main {
-        display: grid;
-        grid-template-columns: 1.4fr 1fr 1fr 1fr;
-        gap: 48px;
-        width: min(1060px, calc(100% - 48px));
-        margin: 0 auto;
-        padding: 56px 0 48px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-      }
-
-      .footer__brand {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .footer__name {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 900;
-        letter-spacing: 0.04em;
-        line-height: 1.2;
-        color: var(--white);
-      }
-
-      .footer__name em {
-        font-style: normal;
-        color: var(--primary);
-      }
-
-      .footer__tagline {
-        margin: 0;
-        font-size: 13px;
-        color: rgba(255,255,255,0.5);
-        line-height: 1.6;
-      }
-
-      .footer__social {
-        display: flex;
-        gap: 12px;
-        margin-top: 4px;
-      }
-
-      .footer__social a {
-        display: grid;
-        place-items: center;
-        width: 40px;
-        height: 40px;
-        border: 1.5px solid rgba(255,255,255,0.2);
-        border-radius: 50%;
-        color: var(--white);
-        transition: border-color 160ms ease, background 160ms ease;
-      }
-
-      .footer__social a:hover {
-        border-color: var(--primary);
-        background: var(--primary);
-      }
-
-      .footer__social svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-      }
-
-      .footer__col-label {
-        margin: 0 0 16px;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 0.22em;
-        color: var(--primary);
-      }
-
-      .footer__col p,
-      .footer__col a {
-        margin: 0 0 8px;
-        font-size: 14px;
-        color: rgba(255,255,255,0.75);
-        text-decoration: none;
-        display: block;
-        line-height: 1.5;
-        transition: color 150ms ease;
-      }
-
-      .footer__col a:hover {
-        color: var(--white);
-      }
-
-      .footer__col strong {
-        display: block;
-        color: var(--white);
-        font-size: 15px;
-        margin-bottom: 6px;
-      }
-
-      .footer__bottom {
-        width: min(1060px, calc(100% - 48px));
-        margin: 0 auto;
-        padding: 20px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .footer__bottom p {
-        margin: 0;
-        font-size: 11px;
         letter-spacing: 0.14em;
-        color: rgba(255,255,255,0.28);
       }
       
       .admin-header {
@@ -731,18 +489,94 @@
       .admin-page {
         padding: 42px 0;
       }
+
+      .admin-login,
+      .admin-shell {
+        display: none;
+      }
+
+      .admin-login.is-active,
+      .admin-shell.is-active {
+        display: block;
+      }
+
+      .admin-login {
+        min-height: calc(100vh - 76px);
+        padding: 64px 0;
+        background: var(--background);
+      }
+
+      .admin-login__panel {
+        width: min(440px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px;
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--primary);
+        background: var(--white);
+      }
+
+      .admin-login__panel h1 {
+        margin-bottom: 10px;
+        font-size: 30px;
+      }
+
+      .admin-login__panel p {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+
+      .admin-login__panel label {
+        display: block;
+        margin-bottom: 18px;
+      }
+
+      .admin-login__message {
+        min-height: 22px;
+        margin: 14px 0 0;
+        color: var(--primary);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .admin-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .admin-summary div {
+        padding: 18px;
+        border: 1px solid var(--border);
+        background: var(--white);
+      }
+
+      .admin-summary span {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+
+      .admin-summary strong {
+        color: var(--primary);
+        font-size: 34px;
+        line-height: 1;
+      }
       
       .admin-filters {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
       }
       
       .filter-card {
         border: 2px solid var(--border);
         background: var(--white);
-        padding: 20px;
+        padding: 16px;
         text-align: left;
         cursor: pointer;
       }
@@ -756,7 +590,7 @@
       .filter-card strong {
         display: block;
         color: var(--primary);
-        font-size: 34px;
+        font-size: 28px;
         font-weight: 900;
       }
       
@@ -766,7 +600,7 @@
       
       .filter-card span {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
         letter-spacing: 0.14em;
       }
@@ -812,23 +646,82 @@
       }
       
       .admin-search {
-        margin-bottom: 24px;
         background: var(--white);
+      }
+
+      .admin-toolbar {
+        display: grid;
+        grid-template-columns: 1fr 220px 220px;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .admin-notice {
+        min-height: 22px;
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .admin-notice[data-tone="error"] {
+        color: var(--primary);
+      }
+
+      .reservation-group {
+        margin-top: 20px;
+      }
+
+      .reservation-group__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 10px;
+      }
+
+      .reservation-group__header h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .reservation-group__header span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
       }
       
       .reservation-card {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 170px 1fr auto;
         gap: 18px;
         margin-bottom: 14px;
         padding: 20px;
         border: 1px solid var(--border);
         background: var(--white);
       }
+
+      .reservation-card__date {
+        display: grid;
+        align-content: center;
+        gap: 6px;
+        padding-right: 18px;
+        border-right: 1px solid var(--border);
+      }
+
+      .reservation-card__date strong {
+        font-size: 18px;
+      }
+
+      .reservation-card__date span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
       
       .reservation-card__info {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: 1.25fr 1.25fr 1fr;
         gap: 18px;
       }
       
@@ -881,6 +774,12 @@
         letter-spacing: 0.08em;
         cursor: pointer;
       }
+
+      .action-button:disabled,
+      .button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
       
       .action-button--confirm {
         background: var(--success);
@@ -903,13 +802,6 @@
         font-weight: 700;
       }
       
-      #about,
-      #menu-grid,
-      #book,
-      #footer {
-        scroll-margin-top: 68px;
-      }
-
       .reveal {
         opacity: 0;
         transform: translateY(22px);
@@ -936,24 +828,28 @@
           line-height: 1.6;
         }
       
-        .hero__title {
-          font-size: clamp(52px, 14vw, 80px);
-        }
-
-        .hero__sub {
-          grid-template-columns: 1fr;
-          gap: 20px;
+        .hero__card {
+          padding: 34px 24px;
         }
       
         .split,
         .menu-grid,
         .form-grid,
         .footer__grid,
+        .admin-summary,
         .admin-filters,
+        .admin-toolbar,
         .refresh-status,
         .reservation-card,
         .reservation-card__info {
           grid-template-columns: 1fr;
+        }
+
+        .reservation-card__date {
+          padding-right: 0;
+          padding-bottom: 14px;
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
         }
       
         .stats {
@@ -968,30 +864,7 @@
           padding: 28px 18px;
         }
       
-        .navbar {
-          padding: 0 18px;
-          height: 58px;
-        }
-
-        .navbar__links {
-          gap: 16px;
-        }
-
-        .navbar__links li:not(:last-child) {
-          display: none;
-        }
-
-        .footer__main {
-          grid-template-columns: 1fr 1fr;
-          gap: 32px;
-        }
-
-        .footer__brand {
-          grid-column: 1 / -1;
-        }
-
-        .footer__bottom {
-          flex-direction: column;
+        .footer__grid {
           text-align: center;
         }
       
@@ -1022,132 +895,20 @@
   </head>
   <body>
     <div data-view="site">
-
-
-      <nav class="navbar">
-        <a class="navbar__logo" href="/">
-          ΧΑΡΟΥ<em>ΜΕΝΕΣ</em><br/>ΣΑΡΔΕ<em>ΛΕΣ</em>
-        </a>
-        <ul class="navbar__links">
-          <li><a href="/">ΑΡΧΙΚΗ</a></li>
-          <li><a href="#about">ΤΟ ΜΑΓΑΖΙ</a></li>
-          <li><a href="#menu-grid">ΜΕΝΟΥ</a></li>
-          <li><a href="#footer">ΕΠΙΚΟΙΝΩΝΙΑ</a></li>
-          <li><a class="navbar__cta" href="#book">ΚΛΕΙΣΕ ΤΡΑΠΕΖΙ</a></li>
-        </ul>
-      </nav>
+      <div class="topbar">
+        ΟΛΥΜΠΟΥ 15, ΘΕΣΣΑΛΟΝΙΚΗ | 2310 553 479 | ΑΝΟΙΧΤΑ ΚΑΘΗΜΕΡΙΝΑ ΕΩΣ 23:00
+      </div>
 
       <header class="hero">
-        <div class="hero__bg" aria-hidden="true"></div>
-        <div class="hero__accent" aria-hidden="true"></div>
-        <div class="hero__bar" aria-hidden="true"></div>
-        <svg class="hero__sardines" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <!-- Sardine facing RIGHT -->
-            <g id="sR-lg">
-              <ellipse cx="95" cy="23" rx="93" ry="19" fill="none" stroke="#1b3564" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M188,23 Q212,8 206,23 Q212,38 188,23Z" fill="none" stroke="#1b3564" stroke-width="3.5" stroke-linejoin="round"/>
-              <circle cx="30" cy="19" r="4.5" fill="#1b3564"/>
-              <path d="M72,15 Q86,11 100,15" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <path d="M72,23 Q89,19 106,23" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <path d="M72,31 Q86,27 100,31" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="54" cy="23" r="3.5" fill="none" stroke="#1b3564" stroke-width="2.5"/>
-              <path d="M116,10 Q130,0 124,23 Q130,46 116,36" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-            </g>
-            <g id="sR-md">
-              <ellipse cx="68" cy="17" rx="66" ry="14" fill="none" stroke="#1b3564" stroke-width="3.2" stroke-linecap="round"/>
-              <path d="M134,17 Q153,6 148,17 Q153,28 134,17Z" fill="none" stroke="#1b3564" stroke-width="3.2" stroke-linejoin="round"/>
-              <circle cx="22" cy="14" r="3.5" fill="#1b3564"/>
-              <path d="M50,10 Q62,7 74,10" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M50,17 Q65,14 80,17" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M50,24 Q62,21 74,24" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <circle cx="38" cy="17" r="2.8" fill="none" stroke="#1b3564" stroke-width="2"/>
-            </g>
-            <g id="sR-sm">
-              <ellipse cx="46" cy="11" rx="44" ry="9" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M90,11 Q104,4 100,11 Q104,18 90,11Z" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linejoin="round"/>
-              <circle cx="16" cy="9" r="2.5" fill="#1b3564"/>
-              <path d="M34,7 Q43,5 52,7" fill="none" stroke="#1b3564" stroke-width="2.2" stroke-linecap="round"/>
-              <path d="M34,11 Q45,9 56,11" fill="none" stroke="#1b3564" stroke-width="2.2" stroke-linecap="round"/>
-              <circle cx="28" cy="11" r="2" fill="none" stroke="#1b3564" stroke-width="1.8"/>
-            </g>
-            <!-- Sardine facing LEFT (mirrored) -->
-            <g id="sL-lg">
-              <ellipse cx="95" cy="23" rx="93" ry="19" fill="none" stroke="#1b3564" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M2,23 Q-22,8 -16,23 Q-22,38 2,23Z" fill="none" stroke="#1b3564" stroke-width="3.5" stroke-linejoin="round"/>
-              <circle cx="160" cy="19" r="4.5" fill="#1b3564"/>
-              <path d="M118,15 Q104,11 90,15" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <path d="M118,23 Q101,19 84,23" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <path d="M118,31 Q104,27 90,31" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="136" cy="23" r="3.5" fill="none" stroke="#1b3564" stroke-width="2.5"/>
-              <path d="M74,10 Q60,0 66,23 Q60,46 74,36" fill="none" stroke="#1b3564" stroke-width="3" stroke-linecap="round"/>
-            </g>
-            <g id="sL-md">
-              <ellipse cx="68" cy="17" rx="66" ry="14" fill="none" stroke="#1b3564" stroke-width="3.2" stroke-linecap="round"/>
-              <path d="M2,17 Q-17,6 -12,17 Q-17,28 2,17Z" fill="none" stroke="#1b3564" stroke-width="3.2" stroke-linejoin="round"/>
-              <circle cx="114" cy="14" r="3.5" fill="#1b3564"/>
-              <path d="M86,10 Q74,7 62,10" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M86,17 Q71,14 56,17" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M86,24 Q74,21 62,24" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <circle cx="98" cy="17" r="2.8" fill="none" stroke="#1b3564" stroke-width="2"/>
-            </g>
-            <g id="sL-sm">
-              <ellipse cx="46" cy="11" rx="44" ry="9" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linecap="round"/>
-              <path d="M2,11 Q-12,4 -8,11 Q-12,18 2,11Z" fill="none" stroke="#1b3564" stroke-width="2.8" stroke-linejoin="round"/>
-              <circle cx="76" cy="9" r="2.5" fill="#1b3564"/>
-              <path d="M58,7 Q49,5 40,7" fill="none" stroke="#1b3564" stroke-width="2.2" stroke-linecap="round"/>
-              <path d="M58,11 Q47,9 36,11" fill="none" stroke="#1b3564" stroke-width="2.2" stroke-linecap="round"/>
-              <circle cx="64" cy="11" r="2" fill="none" stroke="#1b3564" stroke-width="1.8"/>
-            </g>
-          </defs>
-
-          <!-- 1: top-left large, right, slight dip -->
-          <use href="#sR-lg" transform="translate(60,75) rotate(-8)" opacity="0.13"/>
-          <!-- 2: top-right small, LEFT facing -->
-          <use href="#sL-sm" transform="translate(1040,55) rotate(6)" opacity="0.11"/>
-          <!-- 3: mid-left medium, right, steep up -->
-          <use href="#sR-md" transform="translate(10,270) rotate(-18)" opacity="0.10"/>
-          <!-- 4: center large, right, gentle tilt -->
-          <use href="#sR-lg" transform="translate(370,310) rotate(5)" opacity="0.09"/>
-          <!-- 5: right-center medium, LEFT facing, going down -->
-          <use href="#sL-md" transform="translate(980,190) rotate(22)" opacity="0.11"/>
-          <!-- 6: bottom center-left medium, right -->
-          <use href="#sR-md" transform="translate(260,500) rotate(-4)" opacity="0.09"/>
-          <!-- 7: top-center small, right -->
-          <use href="#sR-sm" transform="translate(490,28) rotate(3)" opacity="0.08"/>
-          <!-- 8: bottom-right medium, LEFT facing, tilted -->
-          <use href="#sL-md" transform="translate(870,450) rotate(-14)" opacity="0.10"/>
-          <!-- 9: far right top, small, LEFT facing -->
-          <use href="#sL-sm" transform="translate(1100,160) rotate(-10)" opacity="0.09"/>
-          <!-- 10: bottom-left small, right, steep -->
-          <use href="#sR-sm" transform="translate(30,540) rotate(15)" opacity="0.10"/>
-          <!-- 11: upper-center-right large, LEFT facing -->
-          <use href="#sL-lg" transform="translate(680,100) rotate(-6)" opacity="0.08"/>
-          <!-- 12: mid-right small, right, diving down -->
-          <use href="#sR-sm" transform="translate(1050,360) rotate(25)" opacity="0.09"/>
-          <!-- 13: bottom-center small, LEFT facing -->
-          <use href="#sL-sm" transform="translate(600,570) rotate(8)" opacity="0.10"/>
-          <!-- 14: mid-center-left small, right, almost flat -->
-          <use href="#sR-sm" transform="translate(200,180) rotate(-3)" opacity="0.08"/>
-        </svg>
-
-        <div class="hero__content">
-          <p class="hero__eyebrow">NEW AGE ΜΕΖΕΔΟΠΩΛΕΙΟ · ΘΕΣΣΑΛΟΝΙΚΗ</p>
-          <h1 class="hero__title">
-            <span class="word-charoumenes">ΧΑΡΟΥΜΕΝΕΣ</span>
-            <span class="word-sardeles">ΣΑΡΔΕΛΕΣ</span>
-          </h1>
-          <div class="hero__sub">
-            <p class="hero__tagline">
-              Εκεί που οι μεζέδες έγιναν new age<br />
-              και οι σαρδέλες βρήκαν τον λόγο να είναι χαρούμενες.
-            </p>
-            <div class="hero__actions">
-              <a class="button" href="#book">ΚΛΕΙΣΕ ΤΡΑΠΕΖΙ</a>
-            </div>
-          </div>
+        <div class="hero__graphic" aria-hidden="true"></div>
+        <div class="hero__card reveal">
+          <img class="logo logo--large" src="/assets/images/logo.png" alt="Χαρούμενες Σαρδέλες" />
+          <p>
+            Εκεί που οι μεζέδες έγιναν new age<br />
+            και οι σαρδέλες βρήκαν τον λόγο να είναι χαρούμενες.
+          </p>
+          <a class="button button--full" href="#book">ΚΛΕΙΣΕ ΤΡΑΠΕΖΙ</a>
         </div>
-
       </header>
 
       <section class="ticker" aria-label="Χαρούμενες Σαρδέλες">
@@ -1155,7 +916,7 @@
       </section>
 
       <main>
-        <section class="section section--white" id="about">
+        <section class="section section--white">
           <div class="container split">
             <div class="reveal">
               <p class="eyebrow">ΤΟ ΜΑΓΑΖΙ</p>
@@ -1170,11 +931,25 @@
               </p>
               <p>Το μαγαζί έγινε γρήγορα το νέο στέκι της πόλης. Και δικαίως.</p>
 
-
+              <div class="stats">
+                <div>
+                  <strong id="stats-reservations">0</strong>
+                  <span>ΚΡΑΤΗΣΕΙΣ</span>
+                </div>
+                <div>
+                  <strong id="stats-guests">0</strong>
+                  <span>ΕΠΙΣΚΕΠΤΕΣ</span>
+                </div>
+                <div>
+                  <strong>4,8</strong>
+                  <span>GOOGLE</span>
+                </div>
+              </div>
             </div>
 
             <figure class="feature-image reveal">
               <img src="/assets/images/food-table.png" alt="Μεζέδες στο τραπέζι" />
+              <figcaption>15-30€ ΑΝΑ ΑΤΟΜΟ</figcaption>
             </figure>
           </div>
         </section>
@@ -1255,42 +1030,28 @@
         </section>
       </main>
 
-      <footer class="footer" id="footer">
-        <div class="footer__main">
-          <div class="footer__brand">
-            <p class="footer__name">ΧΑΡΟΥ<em>ΜΕΝΕΣ</em><br/>ΣΑΡΔΕ<em>ΛΕΣ</em></p>
-            <p class="footer__tagline">New age μεζεδοπωλείο<br/>στην καρδιά της Θεσσαλονίκης.</p>
-            <div class="footer__social">
-              <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </a>
-            </div>
+      <footer class="footer">
+        <div class="footer__logo">
+          <img class="logo" src="/assets/images/logo.png" alt="Χαρούμενες Σαρδέλες" />
+        </div>
+        <div class="container footer__grid">
+          <div>
+            <p class="footer__label">ΜΕΖΕΔΟΠΩΛΕΙΟ</p>
+            <strong>Χαρούμενες Σαρδέλες</strong>
+            <span>Θεσσαλονίκη · 2026</span>
           </div>
-
-          <div class="footer__col">
-            <p class="footer__col-label">ΠΛΟΗΓΗΣΗ</p>
-            <a href="/">Αρχική</a>
-            <a href="#menu-grid">Μενού</a>
-            <a href="#book">Κράτηση</a>
-          </div>
-
-          <div class="footer__col">
-            <p class="footer__col-label">ΔΙΕΥΘΥΝΣΗ</p>
+          <div>
+            <p class="footer__label">ΔΙΕΥΘΥΝΣΗ</p>
             <strong>Ολύμπου 15</strong>
-            <p>Θεσσαλονίκη 546 30</p>
+            <span>Θεσσαλονίκη 546 30</span>
           </div>
-
-          <div class="footer__col">
-            <p class="footer__col-label">ΕΠΙΚΟΙΝΩΝΙΑ</p>
-            <a href="tel:2310553479">2310 553 479</a>
-            <p>Ανοιχτά καθημερινά<br/>έως 23:00</p>
+          <div>
+            <p class="footer__label">ΕΠΙΚΟΙΝΩΝΙΑ</p>
+            <strong class="footer__phone">2310 553 479</strong>
+            <span>Ανοιχτά καθημερινά έως 23:00</span>
           </div>
         </div>
-
-        <div class="footer__bottom">
-          <p>© 2026 ΧΑΡΟΥΜΕΝΕΣ ΣΑΡΔΕΛΕΣ</p>
-          <p>ΜΗΝ ΨΑΡΩΝΕΙΣ</p>
-        </div>
+        <p class="copyright">© 2026 ΧΑΡΟΥΜΕΝΕΣ ΣΑΡΔΕΛΕΣ · ΜΗΝ ΨΑΡΩΝΕΙΣ</p>
       </footer>
     </div>
 
@@ -1303,8 +1064,28 @@
         <a class="admin-header__link" href="/">ΠΙΣΩ ΣΤΗ ΣΕΛΙΔΑ</a>
       </header>
 
-      <main class="admin-page">
+      <section class="admin-login" id="admin-login" aria-label="Admin login">
+        <form class="admin-login__panel" id="admin-login-form">
+          <h1>Είσοδος admin</h1>
+          <p>Οι κρατήσεις φορτώνουν μόνο μετά από έλεγχο στο backend.</p>
+          <label>
+            <span>PASSWORD</span>
+            <input
+              id="admin-login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <button class="button button--full" type="submit">ΣΥΝΔΕΣΗ</button>
+          <p class="admin-login__message" id="admin-login-message" role="status"></p>
+        </form>
+      </section>
+
+      <main class="admin-page admin-shell" id="admin-shell">
         <div class="container">
+          <div class="admin-summary" id="admin-summary"></div>
           <div class="admin-filters" id="admin-filters"></div>
           <div class="refresh-status" aria-live="polite">
             <div>
@@ -1315,14 +1096,30 @@
               <div class="refresh-status__bar" id="refresh-bar"></div>
             </div>
           </div>
-          <input
-            class="admin-search"
-            id="admin-search"
-            data-testid="input-search"
-            type="search"
-            placeholder="Αναζήτηση με όνομα, τηλέφωνο ή email..."
-          />
+          <div class="admin-toolbar">
+            <input
+              class="admin-search"
+              id="admin-search"
+              data-testid="input-search"
+              type="search"
+              placeholder="Αναζήτηση με όνομα, τηλέφωνο, email, ημερομηνία..."
+            />
+            <select id="admin-date-scope" aria-label="Φίλτρο ημερομηνίας">
+              <option value="active">Ενεργές επόμενες</option>
+              <option value="today">Σήμερα</option>
+              <option value="upcoming">Μελλοντικές</option>
+              <option value="past">Παλαιότερες</option>
+              <option value="all">Όλες οι ημερομηνίες</option>
+            </select>
+            <select id="admin-sort" aria-label="Ταξινόμηση">
+              <option value="date-asc">Πιο κοντινές πρώτα</option>
+              <option value="date-desc">Πιο μακρινές πρώτα</option>
+              <option value="created-desc">Νεότερες αιτήσεις</option>
+            </select>
+          </div>
+          <p class="admin-notice" id="admin-notice" role="status"></p>
           <div class="reservations" id="reservations-list"></div>
+          <button class="action-button action-button--delete" id="admin-logout" type="button">ΑΠΟΣΥΝΔΕΣΗ</button>
         </div>
       </main>
     </div>
