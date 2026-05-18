@@ -96,6 +96,8 @@ let lastAdminRefreshAt = null;
 let nextAdminRefreshAt = null;
 let adminRefreshInterval = null;
 let adminRefreshStatusInterval = null;
+let adminReservationsCache = [];
+let hasAdminReservationsCache = false;
 let selectedReservationIds = new Set();
 let visibleReservationIds = [];
 
@@ -394,7 +396,7 @@ function renderAdminFilters(reservations) {
   filters.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       currentFilter = button.dataset.filter;
-      renderAdmin();
+      renderAdminFromCache();
     });
   });
 }
@@ -681,6 +683,28 @@ function renderReservations(reservations) {
   updateBulkSelectionControls();
 }
 
+function renderAdminView(reservations, shouldUpdateRefreshStatus = false) {
+  renderAdminSummary(reservations);
+  renderAdminFilters(reservations);
+  renderReservations(reservations);
+  showAdminNotice("");
+
+  if (shouldUpdateRefreshStatus) {
+    lastAdminRefreshAt = new Date();
+    nextAdminRefreshAt = new Date(Date.now() + 30000);
+    updateRefreshStatus();
+  }
+}
+
+function renderAdminFromCache() {
+  if (!hasAdminReservationsCache) {
+    renderAdmin();
+    return;
+  }
+
+  renderAdminView(adminReservationsCache);
+}
+
 async function renderAdmin() {
   if (isAdminRendering) return;
 
@@ -688,13 +712,9 @@ async function renderAdmin() {
 
   try {
     const reservations = await getAdminReservations();
-    renderAdminSummary(reservations);
-    renderAdminFilters(reservations);
-    renderReservations(reservations);
-    showAdminNotice("");
-    lastAdminRefreshAt = new Date();
-    nextAdminRefreshAt = new Date(Date.now() + 30000);
-    updateRefreshStatus();
+    adminReservationsCache = reservations;
+    hasAdminReservationsCache = true;
+    renderAdminView(reservations, true);
   } catch (error) {
     if (error.message.includes("authentication")) {
       showAdminLogin();
@@ -850,14 +870,14 @@ function initAdmin() {
     }
   });
 
-  searchInput.addEventListener("input", renderAdmin);
+  searchInput.addEventListener("input", renderAdminFromCache);
   document.querySelector("#admin-date-scope")?.addEventListener("change", (event) => {
     currentDateScope = event.target.value;
-    renderAdmin();
+    renderAdminFromCache();
   });
   document.querySelector("#admin-sort")?.addEventListener("change", (event) => {
     currentSort = event.target.value;
-    renderAdmin();
+    renderAdminFromCache();
   });
 
   getAdminSession()
