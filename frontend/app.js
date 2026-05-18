@@ -352,8 +352,20 @@ async function setReservationStatus(id, status) {
   if (button) button.disabled = true;
 
   try {
-    await updateReservationStatus(id, status);
+    const updatedReservation = await updateReservationStatus(id, status);
     await renderAdmin();
+
+    if (status === "confirmed") {
+      if (updatedReservation.confirmationEmail?.sent) {
+        showAdminNotice("Η κράτηση επιβεβαιώθηκε και στάλθηκε email στον πελάτη.", "success");
+      } else if (updatedReservation.confirmationEmail?.configured === false) {
+        showAdminNotice("Η κράτηση επιβεβαιώθηκε, αλλά το email δεν είναι ρυθμισμένο στο Render.", "error");
+      } else if (updatedReservation.confirmationEmail?.error) {
+        showAdminNotice(`Η κράτηση επιβεβαιώθηκε, αλλά το email απέτυχε: ${updatedReservation.confirmationEmail.error}`, "error");
+      } else {
+        showAdminNotice("Η κράτηση επιβεβαιώθηκε. Email στέλνεται μόνο όταν αλλάζει από pending/cancelled σε confirmed.", "success");
+      }
+    }
   } catch (error) {
     showAdminNotice(error.message || "Η αλλαγή δεν ολοκληρώθηκε.", "error");
     if (error.message.includes("authentication")) {
