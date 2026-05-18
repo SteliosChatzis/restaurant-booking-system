@@ -96,6 +96,8 @@ let lastAdminRefreshAt = null;
 let nextAdminRefreshAt = null;
 let adminRefreshInterval = null;
 let adminRefreshStatusInterval = null;
+let selectedReservationIds = new Set();
+let visibleReservationIds = [];
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, {
@@ -163,6 +165,13 @@ async function logoutAdmin() {
 
 async function getAdminReservations() {
   return apiRequest("/api/reservations");
+}
+
+async function createAdminReservation(reservation) {
+  return apiRequest("/api/reservations", {
+    method: "POST",
+    body: JSON.stringify(reservation),
+  });
 }
 
 async function createReservation(reservation) {
@@ -479,6 +488,53 @@ function showAdminNotice(message, tone = "default") {
   notice.dataset.tone = tone;
 }
 
+function updateBulkSelectionControls() {
+  const count = selectedReservationIds.size;
+  const countLabel = document.querySelector("#selected-count");
+  const deleteButton = document.querySelector("#delete-selected");
+  const selectAllButton = document.querySelector("#select-all-visible");
+  const clearButton = document.querySelector("#clear-selected");
+
+  if (countLabel) {
+    countLabel.textContent = `${count} επιλεγμένες`;
+  }
+
+  if (deleteButton) {
+    deleteButton.disabled = count === 0;
+  }
+
+  if (clearButton) {
+    clearButton.disabled = count === 0;
+  }
+
+  if (selectAllButton) {
+    selectAllButton.disabled = visibleReservationIds.length === 0;
+  }
+}
+
+function renderManualReservationTimeSlots() {
+  const timeSelect = document.querySelector("#manual-time");
+  if (!timeSelect) return;
+
+  timeSelect.innerHTML = timeSlots
+    .map((time) => `<option value="${time}" ${time === "20:00" ? "selected" : ""}>${time}</option>`)
+    .join("");
+}
+
+function reservationFromForm(form) {
+  const formData = new FormData(form);
+
+  return {
+    name: formData.get("name").trim(),
+    phone: formData.get("phone").trim(),
+    email: formData.get("email").trim(),
+    guests: Number(formData.get("guests")),
+    date: formData.get("date"),
+    time: formData.get("time"),
+    occasion: formData.get("occasion"),
+  };
+}
+
 function renderReservations(reservations) {
   const list = document.querySelector("#reservations-list");
   const searchInput = document.querySelector("#admin-search");
@@ -497,8 +553,13 @@ function renderReservations(reservations) {
 
   if (filteredReservations.length === 0) {
     list.innerHTML = '<div class="empty-state">Δεν βρέθηκαν κρατήσεις με αυτά τα φίλτρα</div>';
+    visibleReservationIds = [];
+    updateBulkSelectionControls();
     return;
   }
+
+  visibleReservationIds = filteredReservations.map((reservation) => reservation.id);
+  selectedReservationIds = new Set([...selectedReservationIds].filter((id) => reservations.some((reservation) => reservation.id === id)));
 
   list.innerHTML = groupReservations(filteredReservations)
     .map(
@@ -512,6 +573,14 @@ function renderReservations(reservations) {
             .map(
               (reservation) => `
         <article class="reservation-card" data-testid="reservation-${reservation.id}">
+          <label class="reservation-card__select" aria-label="Επιλογή κράτησης ${escapeHtml(reservation.name)}">
+            <input
+              type="checkbox"
+              data-select-reservation
+              value="${escapeHtml(reservation.id)}"
+              ${selectedReservationIds.has(reservation.id) ? "checked" : ""}
+            />
+          </label>
           <div class="reservation-card__date">
             <strong>${escapeHtml(formatReservationDate(reservation))}</strong>
             <span>${escapeHtml(reservation.time)} · ${escapeHtml(reservation.guests)} άτομα</span>
@@ -566,6 +635,20 @@ function renderReservations(reservations) {
       setReservationStatus(button.dataset.id, button.dataset.action);
     });
   });
+
+  list.querySelectorAll("[data-select-reservation]").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        selectedReservationIds.add(checkbox.value);
+      } else {
+        selectedReservationIds.delete(checkbox.value);
+      }
+
+      updateBulkSelectionControls();
+    });
+  });
+
+  updateBulkSelectionControls();
 }
 
 async function renderAdmin() {
@@ -618,6 +701,12 @@ function initAdmin() {
   const searchInput = document.querySelector("#admin-search");
   if (!searchInput) return;
 
+  renderManualReservationTimeSlots();
+  const manualDateInput = document.querySelector("#manual-date");
+  if (manualDateInput) {
+    manualDateInput.value = formatDateForInput(new Date());
+  }
+
   document.querySelector("#admin-login-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -647,6 +736,88 @@ function initAdmin() {
     await logoutAdmin().catch(() => null);
     stopAdminRefresh();
     showAdminLogin();
+  });
+
+  document.querySelector("#toggle-manual-form")?.addEventListener("click", () => {
+    document.querySelector("#manual-reservation-panel")?.classList.toggle("is-open");
+    document.querySelector("#manual-name")?.focus();
+  });
+
+  document.querySelector("#cancel-manual-form")?.addEventListener("click", () => {
+    document.querySelector("#manual-reservation-panel")?.classList.remove("is-open");
+  });
+
+  document.querySelector("#manual-reservation-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector("button[type='submit']");
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    button.disabled = true;
+
+    try {
+      await createAdminReservation(reservationFromForm(form));
+      form.reset();
+      form.elements.guests.value = "2";
+      form.elements.date.value = formatDateForInput(new Date());
+      form.elements.time.value = "20:00";
+      document.querySelector("#manual-reservation-panel")?.classList.remove("is-open");
+      await renderAdmin();
+      showAdminNotice("Η κράτηση προστέθηκε χειροκίνητα.", "success");
+    } catch (error) {
+      showAdminNotice(error.message || "Δεν έγινε η προσθήκη κράτησης.", "error");
+      if (error.message.includes("authentication")) {
+        showAdminLogin();
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.querySelector("#select-all-visible")?.addEventListener("click", () => {
+    visibleReservationIds.forEach((id) => selectedReservationIds.add(id));
+    document.querySelectorAll("[data-select-reservation]").forEach((checkbox) => {
+      checkbox.checked = true;
+    });
+    updateBulkSelectionControls();
+  });
+
+  document.querySelector("#clear-selected")?.addEventListener("click", () => {
+    selectedReservationIds.clear();
+    document.querySelectorAll("[data-select-reservation]").forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    updateBulkSelectionControls();
+  });
+
+  document.querySelector("#delete-selected")?.addEventListener("click", async () => {
+    const ids = [...selectedReservationIds];
+    if (ids.length === 0) return;
+
+    const confirmed = confirm(`Σίγουρα θέλεις να διαγράψεις ${ids.length} επιλεγμένες κρατήσεις;`);
+    if (!confirmed) return;
+
+    const button = document.querySelector("#delete-selected");
+    button.disabled = true;
+
+    try {
+      await Promise.all(ids.map((id) => removeReservation(id)));
+      selectedReservationIds.clear();
+      await renderAdmin();
+      showAdminNotice(`Διαγράφηκαν ${ids.length} κρατήσεις.`, "success");
+    } catch (error) {
+      showAdminNotice(error.message || "Δεν ολοκληρώθηκε η μαζική διαγραφή.", "error");
+      if (error.message.includes("authentication")) {
+        showAdminLogin();
+      }
+    } finally {
+      button.disabled = false;
+      updateBulkSelectionControls();
+    }
   });
 
   searchInput.addEventListener("input", renderAdmin);

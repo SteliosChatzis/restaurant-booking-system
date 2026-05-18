@@ -656,6 +656,89 @@
         margin-bottom: 18px;
       }
 
+      .admin-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        background: var(--white);
+      }
+
+      .admin-actions__spacer {
+        flex: 1;
+      }
+
+      .admin-actions__count {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+      }
+
+      .admin-button {
+        min-height: 42px;
+        border: 2px solid var(--border);
+        background: var(--white);
+        padding: 10px 14px;
+        color: var(--foreground);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+      }
+
+      .admin-button:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .admin-button--primary {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      .admin-button--primary:hover {
+        background: var(--white);
+      }
+
+      .admin-button--danger {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      .admin-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .manual-reservation {
+        display: none;
+        margin-bottom: 18px;
+        padding: 22px;
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--primary);
+        background: var(--white);
+      }
+
+      .manual-reservation.is-open {
+        display: block;
+      }
+
+      .manual-reservation h2 {
+        margin: 0 0 18px;
+        font-size: 24px;
+      }
+
+      .manual-reservation__actions {
+        display: flex;
+        gap: 10px;
+      }
+
       .admin-notice {
         min-height: 22px;
         margin: 0 0 14px;
@@ -666,6 +749,10 @@
 
       .admin-notice[data-tone="error"] {
         color: var(--primary);
+      }
+
+      .admin-notice[data-tone="success"] {
+        color: var(--success);
       }
 
       .reservation-group {
@@ -693,12 +780,23 @@
       
       .reservation-card {
         display: grid;
-        grid-template-columns: 170px 1fr auto;
+        grid-template-columns: 32px 170px 1fr auto;
         gap: 18px;
         margin-bottom: 14px;
         padding: 20px;
         border: 1px solid var(--border);
         background: var(--white);
+      }
+
+      .reservation-card__select {
+        display: grid;
+        place-items: center;
+      }
+
+      .reservation-card__select input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
       }
 
       .reservation-card__date {
@@ -843,6 +941,15 @@
         .reservation-card,
         .reservation-card__info {
           grid-template-columns: 1fr;
+        }
+
+        .admin-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .admin-actions__spacer {
+          display: none;
         }
 
         .reservation-card__date {
@@ -1117,6 +1224,63 @@
               <option value="created-desc">Νεότερες αιτήσεις</option>
             </select>
           </div>
+          <div class="admin-actions" aria-label="Ενέργειες κρατήσεων">
+            <button class="admin-button admin-button--primary" id="toggle-manual-form" type="button">
+              ΧΕΙΡΟΚΙΝΗΤΗ ΠΡΟΣΘΗΚΗ
+            </button>
+            <button class="admin-button" id="select-all-visible" type="button">SELECT ALL</button>
+            <button class="admin-button" id="clear-selected" type="button" disabled>ΚΑΘΑΡΙΣΜΟΣ</button>
+            <span class="admin-actions__spacer"></span>
+            <span class="admin-actions__count" id="selected-count">0 επιλεγμένες</span>
+            <button class="admin-button admin-button--danger" id="delete-selected" type="button" disabled>
+              ΔΙΑΓΡΑΦΗ ΕΠΙΛΕΓΜΕΝΩΝ
+            </button>
+          </div>
+          <section class="manual-reservation" id="manual-reservation-panel" aria-label="Χειροκίνητη προσθήκη κράτησης">
+            <h2>Χειροκίνητη προσθήκη</h2>
+            <form id="manual-reservation-form">
+              <div class="form-grid">
+                <label>
+                  <span>ΟΝΟΜΑ *</span>
+                  <input id="manual-name" name="name" placeholder="Π.χ. Γιώργος Παπαδόπουλος" required />
+                </label>
+                <label>
+                  <span>ΤΗΛΕΦΩΝΟ *</span>
+                  <input name="phone" placeholder="Π.χ. 6900 000 000" required />
+                </label>
+                <label>
+                  <span>EMAIL *</span>
+                  <input name="email" type="email" placeholder="email@example.com" required />
+                </label>
+                <label>
+                  <span>ΑΤΟΜΑ *</span>
+                  <input name="guests" type="number" min="1" max="20" value="2" required />
+                </label>
+                <label>
+                  <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
+                  <input id="manual-date" name="date" type="date" required />
+                </label>
+                <label>
+                  <span>ΩΡΑ *</span>
+                  <select id="manual-time" name="time" required></select>
+                </label>
+                <label class="form-grid__full">
+                  <span>ΠΕΡΙΣΤΑΣΗ</span>
+                  <select name="occasion">
+                    <option value="">Χωρίς περίσταση</option>
+                    <option value="birthday">Γενέθλια</option>
+                    <option value="anniversary">Επέτειος</option>
+                    <option value="romantic">Ρομαντικό δείπνο</option>
+                    <option value="business">Επιχειρηματικό γεύμα</option>
+                  </select>
+                </label>
+              </div>
+              <div class="manual-reservation__actions">
+                <button class="button" type="submit">ΠΡΟΣΘΗΚΗ ΚΡΑΤΗΣΗΣ</button>
+                <button class="admin-button" id="cancel-manual-form" type="button">ΑΚΥΡΩΣΗ</button>
+              </div>
+            </form>
+          </section>
           <p class="admin-notice" id="admin-notice" role="status"></p>
           <div class="reservations" id="reservations-list"></div>
           <button class="action-button action-button--delete" id="admin-logout" type="button">ΑΠΟΣΥΝΔΕΣΗ</button>
