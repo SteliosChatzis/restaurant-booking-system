@@ -307,7 +307,7 @@ async function updateStats() {
   }
 }
 
-function initBookingForm() {
+async function initBookingForm() {
   const form = document.querySelector("#booking-form");
   if (!form) return;
 
