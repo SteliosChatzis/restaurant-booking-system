@@ -22,7 +22,7 @@ export default {
       );
     }
 
-    if (url.pathname === "/admin" || url.pathname === "/admin/") {
+    if (url.pathname === "/sardeles-admin" || url.pathname === "/sardeles-admin/") {
       const assetUrl = new URL(request.url);
       assetUrl.pathname = "/index.html";
       assetUrl.search = "?admin";

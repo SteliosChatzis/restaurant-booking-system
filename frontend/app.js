@@ -962,7 +962,8 @@ function stopAdminRefresh() {
 
 function getCurrentView() {
   const path = window.location.pathname.replace(/\/$/, "");
-  return path === "/sardeles-admin" ? "admin" : "site";
+  const query = window.location.search.toLowerCase();
+  return path === "/sardeles-admin" || query.includes("admin") ? "admin" : "site";
 }
 
 function showCurrentView() {
