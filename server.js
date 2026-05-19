@@ -285,8 +285,14 @@ function requireAdmin(request, response, origin) {
 
 async function readBody(request) {
   let body = "";
+  let size = 0;
+  const maxSize = 10 * 1024; // 10kb
 
   for await (const chunk of request) {
+    size += chunk.length;
+    if (size > maxSize) {
+      throw new Error("request body too large");
+    }
     body += chunk;
   }
 
