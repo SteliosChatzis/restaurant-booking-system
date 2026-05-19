@@ -1,0 +1,19 @@
+{
+  "name": "Χαρούμενες Σαρδέλες — Admin",
+  "short_name": "Σαρδέλες",
+  "description": "Πίνακας διαχείρισης κρατήσεων",
+  "start_url": "/sardeles-admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1b3564",
+  "theme_color": "#1b3564",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
