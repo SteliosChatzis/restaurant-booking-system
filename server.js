@@ -39,6 +39,15 @@ async function initDatabase() {
       confirmation_email_sent_at TEXT
     )
   `);
+  await database.execute(`
+    CREATE TABLE IF NOT EXISTS blocked_slots (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      time TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      UNIQUE(date, time)
+    )
+  `);
 }
 
 const databaseReady = initDatabase();
@@ -146,6 +155,31 @@ async function readReservationStats() {
     total: Number(row.total),
     totalGuests: Number(row.totalGuests),
   };
+}
+
+async function getBlockedSlots(date) {
+  await databaseReady;
+  const result = await database.execute({
+    sql: "SELECT * FROM blocked_slots WHERE date = ? ORDER BY time ASC",
+    args: [date],
+  });
+  return result.rows.map((row) => ({ id: row.id, date: row.date, time: row.time }));
+}
+
+async function blockSlot(date, time) {
+  await databaseReady;
+  await database.execute({
+    sql: "INSERT OR IGNORE INTO blocked_slots (id, date, time, created_at) VALUES (?, ?, ?, ?)",
+    args: [crypto.randomUUID(), date, time, new Date().toISOString()],
+  });
+}
+
+async function unblockSlot(date, time) {
+  await databaseReady;
+  await database.execute({
+    sql: "DELETE FROM blocked_slots WHERE date = ? AND time = ?",
+    args: [date, time],
+  });
 }
 
 function sendJson(response, status, body, origin) {
@@ -513,6 +547,41 @@ async function handleRequest(request, response) {
       return;
     }
 
+    if (url.pathname === "/api/slots/blocked" && request.method === "GET") {
+      const date = url.searchParams.get("date");
+      if (!date) {
+        sendJson(response, 400, { error: "date is required" }, origin);
+        return;
+      }
+      const blocked = await getBlockedSlots(date);
+      sendJson(response, 200, blocked, origin);
+      return;
+    }
+
+    if (url.pathname === "/api/slots/block" && request.method === "POST") {
+      if (!requireAdmin(request, response, origin)) return;
+      const body = await readBody(request);
+      if (!body.date || !body.time) {
+        sendJson(response, 400, { error: "date and time are required" }, origin);
+        return;
+      }
+      await blockSlot(body.date, body.time);
+      sendJson(response, 200, { ok: true }, origin);
+      return;
+    }
+
+    if (url.pathname === "/api/slots/unblock" && request.method === "POST") {
+      if (!requireAdmin(request, response, origin)) return;
+      const body = await readBody(request);
+      if (!body.date || !body.time) {
+        sendJson(response, 400, { error: "date and time are required" }, origin);
+        return;
+      }
+      await unblockSlot(body.date, body.time);
+      sendJson(response, 200, { ok: true }, origin);
+      return;
+    }
+
     if (url.pathname === "/api/reservations" && request.method === "POST") {
       if (isReservationRateLimited(request)) {
         sendJson(response, 429, { error: "too many reservation attempts, try again later" }, origin);
@@ -529,6 +598,12 @@ async function handleRequest(request, response) {
 
       const reservation = normalizeReservation(body);
 
+      const blockedCheck = await getBlockedSlots(reservation.date);
+      if (blockedCheck.some((slot) => slot.time === reservation.time)) {
+        sendJson(response, 409, { error: "no availability for this time slot" }, origin);
+        return;
+      }
+
       const capacityResult = await database.execute({
         sql: `SELECT COALESCE(SUM(guests), 0) AS bookedGuests
               FROM reservations
@@ -536,7 +611,7 @@ async function handleRequest(request, response) {
         args: [reservation.date, reservation.time],
       });
       const bookedGuests = Number(capacityResult.rows[0].bookedGuests);
-      const MAX_CAPACITY = 60;
+      const MAX_CAPACITY = 100;
 
       if (bookedGuests + reservation.guests > MAX_CAPACITY) {
         sendJson(response, 409, { error: "no availability for this time slot" }, origin);

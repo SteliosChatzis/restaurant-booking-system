@@ -1537,6 +1537,72 @@
       [data-view].is-active {
         display: block;
       }
+      .slots-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--secondary);
+        padding: 20px 24px;
+        margin-bottom: 24px;
+      }
+
+      .slots-panel__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .slots-panel__header h2 {
+        margin: 4px 0 0;
+      }
+
+      .slots-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .slot-toggle {
+        padding: 8px 14px;
+        border: 1px solid var(--border);
+        background: var(--background);
+        cursor: pointer;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 80px;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      .slot-toggle:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .slot-toggle.is-blocked {
+        background: #fff0f0;
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .slot-toggle.is-open {
+        background: #f0fff4;
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      .slot-toggle__time {
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .slot-toggle__label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
     </style>
     <script src="/app.js" defer></script>
     <script>
@@ -1941,6 +2007,16 @@
                     <button class="admin-button" id="cancel-manual-form" type="button">ΑΚΥΡΩΣΗ</button>
                   </div>
                 </form>
+              </section>
+              <section class="slots-panel" id="slots-panel" aria-label="Διαχείριση διαθεσιμότητας">
+                <div class="slots-panel__header">
+                  <div>
+                    <p class="admin-sidebar__title">Διαχείριση διαθεσιμότητας</p>
+                    <h2>Slots ημέρας</h2>
+                  </div>
+                  <input type="date" id="slots-date" class="admin-input" />
+                </div>
+                <div class="slots-grid" id="slots-grid"></div>
               </section>
               <p class="admin-notice" id="admin-notice" role="status"></p>
               <div class="reservations" id="reservations-list"></div>

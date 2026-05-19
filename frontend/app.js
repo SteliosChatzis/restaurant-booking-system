@@ -210,6 +210,24 @@ async function removeReservation(id) {
   });
 }
 
+async function getBlockedSlots(date) {
+  return apiRequest(`/api/slots/blocked?date=${encodeURIComponent(date)}`);
+}
+
+async function blockSlot(date, time) {
+  return apiRequest("/api/slots/block", {
+    method: "POST",
+    body: JSON.stringify({ date, time }),
+  });
+}
+
+async function unblockSlot(date, time) {
+  return apiRequest("/api/slots/unblock", {
+    method: "POST",
+    body: JSON.stringify({ date, time }),
+  });
+}
+
 function formatDateForInput(date) {
   const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return offsetDate.toISOString().slice(0, 10);
@@ -298,9 +316,33 @@ function initBookingForm() {
   const message = document.querySelector("#form-message");
 
   dateInput.value = formatDateForInput(new Date());
-  timeSelect.innerHTML = timeSlots
-    .map((time) => `<option value="${time}" ${time === "20:00" ? "selected" : ""}>${time}</option>`)
-    .join("");
+
+  async function refreshTimeSlots() {
+    const date = dateInput.value;
+    let blocked = [];
+    try {
+      blocked = await getBlockedSlots(date);
+    } catch {}
+    const blockedTimes = new Set(blocked.map((s) => s.time));
+    const previousValue = timeSelect.value;
+    timeSelect.innerHTML = timeSlots
+      .map((time) => {
+        if (blockedTimes.has(time)) {
+          return `<option value="${time}" disabled>${time} — Μη διαθέσιμο</option>`;
+        }
+        return `<option value="${time}" ${time === "20:00" ? "selected" : ""}>${time}</option>`;
+      })
+      .join("");
+    if (previousValue && !blockedTimes.has(previousValue)) {
+      timeSelect.value = previousValue;
+    } else if (blockedTimes.has(timeSelect.value)) {
+      const firstAvailable = timeSlots.find((t) => !blockedTimes.has(t));
+      if (firstAvailable) timeSelect.value = firstAvailable;
+    }
+  }
+
+  await refreshTimeSlots();
+  dateInput.addEventListener("change", refreshTimeSlots);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -545,6 +587,57 @@ function renderManualReservationTimeSlots() {
     .join("");
 }
 
+async function renderSlotsPanel() {
+  const panel = document.querySelector("#slots-panel");
+  if (!panel) return;
+
+  const dateInput = document.querySelector("#slots-date");
+  const date = dateInput?.value || formatDateForInput(new Date());
+  let blocked = [];
+
+  try {
+    blocked = await getBlockedSlots(date);
+  } catch {}
+
+  const blockedTimes = new Set(blocked.map((s) => s.time));
+
+  panel.querySelector("#slots-grid").innerHTML = timeSlots
+    .map((time) => {
+      const isBlocked = blockedTimes.has(time);
+      return `
+        <button
+          class="slot-toggle ${isBlocked ? "is-blocked" : "is-open"}"
+          data-slot-time="${escapeHtml(time)}"
+          data-slot-date="${escapeHtml(date)}"
+        >
+          <span class="slot-toggle__time">${escapeHtml(time)}</span>
+          <span class="slot-toggle__label">${isBlocked ? "Κλειστό" : "Ανοιχτό"}</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  panel.querySelectorAll("[data-slot-time]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const slotDate = button.dataset.slotDate;
+      const slotTime = button.dataset.slotTime;
+      const isBlocked = button.classList.contains("is-blocked");
+      button.disabled = true;
+      try {
+        if (isBlocked) {
+          await unblockSlot(slotDate, slotTime);
+        } else {
+          await blockSlot(slotDate, slotTime);
+        }
+        await renderSlotsPanel();
+      } catch (error) {
+        showAdminNotice(error.message || "Δεν έγινε η αλλαγή.", "error");
+        button.disabled = false;
+      }
+    });
+  });
+}
+
 function reservationFromForm(form) {
   const formData = new FormData(form);
 
@@ -774,6 +867,13 @@ function initAdmin() {
   if (manualDateInput) {
     manualDateInput.value = formatDateForInput(new Date());
   }
+
+  const slotsDateInput = document.querySelector("#slots-date");
+  if (slotsDateInput) {
+    slotsDateInput.value = formatDateForInput(new Date());
+    slotsDateInput.addEventListener("change", renderSlotsPanel);
+  }
+  renderSlotsPanel();
 
   document.querySelector("#admin-login-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
