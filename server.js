@@ -594,7 +594,8 @@ async function handleRequest(request, response) {
 
     sendJson(response, 404, { error: "not found" }, origin);
   } catch (error) {
-    sendJson(response, 500, { error: "server error", details: error.message }, origin);
+    console.error(error);
+    sendJson(response, 500, { error: "server error" }, origin);
   }
 }
 
