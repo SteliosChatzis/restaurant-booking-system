@@ -455,9 +455,10 @@
         box-sizing: border-box;
       }
 
-      input[type="date"] {
-        text-align: left;
-        padding-right: 10px;
+      .date-selects {
+        display: grid;
+        grid-template-columns: 90px 1fr 100px;
+        gap: 8px;
       }
       
       input:focus,
@@ -1530,6 +1531,55 @@
       }
     </style>
     <script src="/app.js" defer></script>
+    <script>
+    (function () {
+      function initDateSelects() {
+        document.querySelectorAll('.date-selects').forEach(function (wrap) {
+          var targetId = wrap.getAttribute('data-target');
+          var hidden = document.getElementById(targetId);
+          var dayEl = wrap.querySelector('.date-sel--day');
+          var monthEl = wrap.querySelector('.date-sel--month');
+          var yearEl = wrap.querySelector('.date-sel--year');
+
+          for (var d = 1; d <= 31; d++) {
+            var opt = document.createElement('option');
+            opt.value = String(d).padStart(2, '0');
+            opt.textContent = d;
+            dayEl.appendChild(opt);
+          }
+
+          var now = new Date();
+          for (var y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
+            var opt2 = document.createElement('option');
+            opt2.value = y;
+            opt2.textContent = y;
+            yearEl.appendChild(opt2);
+          }
+
+          var today = new Date();
+          dayEl.value = String(today.getDate()).padStart(2, '0');
+          monthEl.value = String(today.getMonth() + 1).padStart(2, '0');
+          yearEl.value = today.getFullYear();
+          updateHidden();
+
+          function updateHidden() {
+            var d2 = dayEl.value, m = monthEl.value, y2 = yearEl.value;
+            hidden.value = (d2 && m && y2) ? (y2 + '-' + m + '-' + d2) : '';
+          }
+
+          [dayEl, monthEl, yearEl].forEach(function (el) {
+            el.addEventListener('change', updateHidden);
+          });
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDateSelects);
+      } else {
+        initDateSelects();
+      }
+    })();
+    </script>
   </head>
   <body>
     <div data-view="site">
@@ -1631,9 +1681,32 @@
                     <span>ΑΤΟΜΑ *</span>
                     <input name="guests" data-testid="input-guests" type="number" min="1" max="20" value="2" required />
                   </label>
-                  <label>
+                  <label class="form-grid__full">
                     <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
-                    <input name="date" data-testid="input-date" type="date" required />
+                    <input name="date" data-testid="input-date" id="booking-date-hidden" type="hidden" />
+                    <div class="date-selects" data-target="booking-date-hidden">
+                      <select class="date-sel date-sel--day" aria-label="Ημέρα">
+                        <option value="">Ημέρα</option>
+                      </select>
+                      <select class="date-sel date-sel--month" aria-label="Μήνας">
+                        <option value="">Μήνας</option>
+                        <option value="01">Ιανουάριος</option>
+                        <option value="02">Φεβρουάριος</option>
+                        <option value="03">Μάρτιος</option>
+                        <option value="04">Απρίλιος</option>
+                        <option value="05">Μάιος</option>
+                        <option value="06">Ιούνιος</option>
+                        <option value="07">Ιούλιος</option>
+                        <option value="08">Αύγουστος</option>
+                        <option value="09">Σεπτέμβριος</option>
+                        <option value="10">Οκτώβριος</option>
+                        <option value="11">Νοέμβριος</option>
+                        <option value="12">Δεκέμβριος</option>
+                      </select>
+                      <select class="date-sel date-sel--year" aria-label="Χρόνος">
+                        <option value="">Χρόνος</option>
+                      </select>
+                    </div>
                   </label>
                   <label>
                     <span>ΩΡΑ *</span>
@@ -1813,9 +1886,32 @@
                       <span>ΑΤΟΜΑ *</span>
                       <input name="guests" type="number" min="1" max="20" value="2" required />
                     </label>
-                    <label>
+                    <label class="form-grid__full">
                       <span>ΗΜΕΡΟΜΗΝΙΑ *</span>
-                      <input id="manual-date" name="date" type="date" required />
+                      <input id="manual-date" name="date" type="hidden" />
+                      <div class="date-selects" data-target="manual-date">
+                        <select class="date-sel date-sel--day" aria-label="Ημέρα">
+                          <option value="">Ημέρα</option>
+                        </select>
+                        <select class="date-sel date-sel--month" aria-label="Μήνας">
+                          <option value="">Μήνας</option>
+                          <option value="01">Ιανουάριος</option>
+                          <option value="02">Φεβρουάριος</option>
+                          <option value="03">Μάρτιος</option>
+                          <option value="04">Απρίλιος</option>
+                          <option value="05">Μάιος</option>
+                          <option value="06">Ιούνιος</option>
+                          <option value="07">Ιούλιος</option>
+                          <option value="08">Αύγουστος</option>
+                          <option value="09">Σεπτέμβριος</option>
+                          <option value="10">Οκτώβριος</option>
+                          <option value="11">Νοέμβριος</option>
+                          <option value="12">Δεκέμβριος</option>
+                        </select>
+                        <select class="date-sel date-sel--year" aria-label="Χρόνος">
+                          <option value="">Χρόνος</option>
+                        </select>
+                      </div>
                     </label>
                     <label>
                       <span>ΩΡΑ *</span>
