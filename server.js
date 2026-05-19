@@ -18,6 +18,9 @@ const loginAttempts = new Map();
 const sessionMaxAgeSeconds = 60 * 60 * 12;
 const maxLoginAttempts = 8;
 const loginWindowMs = 15 * 60 * 1000;
+const reservationAttempts = new Map();
+const maxReservationAttempts = 5;
+const reservationWindowMs = 60 * 60 * 1000; // 1 ώρα
 
 async function initDatabase() {
   await database.execute(`
@@ -231,6 +234,27 @@ function recordFailedLogin(request) {
 
 function clearFailedLogins(request) {
   loginAttempts.delete(getClientKey(request));
+}
+
+function isReservationRateLimited(request) {
+  const key = getClientKey(request);
+  const now = Date.now();
+  const attempt = reservationAttempts.get(key);
+
+  if (!attempt || attempt.resetAt <= now) {
+    reservationAttempts.set(key, { count: 0, resetAt: now + reservationWindowMs });
+    return false;
+  }
+
+  return attempt.count >= maxReservationAttempts;
+}
+
+function recordReservationAttempt(request) {
+  const key = getClientKey(request);
+  const now = Date.now();
+  const attempt = reservationAttempts.get(key) || { count: 0, resetAt: now + reservationWindowMs };
+  attempt.count += 1;
+  reservationAttempts.set(key, attempt);
 }
 
 function passwordsMatch(inputPassword) {
@@ -490,6 +514,11 @@ async function handleRequest(request, response) {
     }
 
     if (url.pathname === "/api/reservations" && request.method === "POST") {
+      if (isReservationRateLimited(request)) {
+        sendJson(response, 429, { error: "too many reservation attempts, try again later" }, origin);
+        return;
+      }
+
       const body = await readBody(request);
       const validationError = validateReservation(body);
 
@@ -499,6 +528,22 @@ async function handleRequest(request, response) {
       }
 
       const reservation = normalizeReservation(body);
+
+      const capacityResult = await database.execute({
+        sql: `SELECT COALESCE(SUM(guests), 0) AS bookedGuests
+              FROM reservations
+              WHERE date = ? AND time = ? AND status != 'cancelled'`,
+        args: [reservation.date, reservation.time],
+      });
+      const bookedGuests = Number(capacityResult.rows[0].bookedGuests);
+      const MAX_CAPACITY = 60;
+
+      if (bookedGuests + reservation.guests > MAX_CAPACITY) {
+        sendJson(response, 409, { error: "no availability for this time slot" }, origin);
+        return;
+      }
+
+      recordReservationAttempt(request);
       await createReservationRecord(reservation);
       sendJson(response, 201, reservation, origin);
       return;
