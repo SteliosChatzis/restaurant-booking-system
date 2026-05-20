@@ -1,6 +1,6 @@
 {
-  "name": "Χαρούμενες Σαρδέλες — Admin",
-  "short_name": "Σαρδέλες",
+  "name": "The Harbour — Admin",
+  "short_name": "Harbour",
   "description": "Πίνακας διαχείρισης κρατήσεων",
   "start_url": "/sardeles-admin",
   "scope": "/",
