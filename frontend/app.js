@@ -87,7 +87,7 @@ const filterLabels = {
 const apiBase =
   window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8787"
-    : "";
+    : "https://restaurant-booking-system-r4k3.onrender.com";
 let currentFilter = "all";
 let currentDateScope = "active";
 let currentSort = "date-asc";
