@@ -6,7 +6,7 @@ dashboard for managing bookings in real time.
 
 ## 🌐 Live Demo
 
-[xaroumenessardeles.xyz](https://xaroumenessardeles.xyz)
+https://restaurant-booking-system.pages.dev
 
 ## Features
 
