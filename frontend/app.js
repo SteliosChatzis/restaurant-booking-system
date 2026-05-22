@@ -87,7 +87,7 @@ const filterLabels = {
 const apiBase =
   window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8787"
-    : "https://restaurant-booking-system-r4k3.onrender.com";
+    : "";
 let currentFilter = "all";
 let currentDateScope = "active";
 let currentSort = "date-asc";
@@ -129,11 +129,11 @@ function escapeHtml(value) {
 }
 
 function getLocalReservations() {
-  return JSON.parse(localStorage.getItem("sardeles-reservations-fallback") || "[]");
+  return JSON.parse(localStorage.getItem("restaurant-reservations-fallback") || "[]");
 }
 
 function saveLocalReservations(reservations) {
-  localStorage.setItem("sardeles-reservations-fallback", JSON.stringify(reservations));
+  localStorage.setItem("restaurant-reservations-fallback", JSON.stringify(reservations));
 }
 
 async function getReservations() {
@@ -1063,7 +1063,7 @@ function stopAdminRefresh() {
 function getCurrentView() {
   const path = window.location.pathname.replace(/\/$/, "");
   const query = window.location.search.toLowerCase();
-  return path === "/sardeles-admin" || query.includes("admin") ? "admin" : "site";
+  return path === "/restaurant-admin" || query.includes("admin") ? "admin" : "site";
 }
 
 function showCurrentView() {

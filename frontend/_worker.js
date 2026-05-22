@@ -1,4 +1,4 @@
-const backendOrigin = "https://sardeles-backend.onrender.com";
+const backendOrigin = "https://restaurant-booking-system-r4k3.onrender.com";
 
 export default {
   async fetch(request, env) {
